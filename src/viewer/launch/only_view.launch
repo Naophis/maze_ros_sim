@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="viewer" name="viewer" type="viewer" />
+
+</launch>
