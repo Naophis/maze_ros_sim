@@ -5,6 +5,7 @@
 #include "maze_solver.hpp"
 #include "stdio.h"
 #include <ros/ros.h>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
@@ -40,6 +41,7 @@ public:
   bool is_goal(int x, int y);
   MazeSolverBaseLgc *lgc;
   int cost_mode = 0;
+  unordered_map<unsigned int, unsigned char> subgoal_list;
 };
 
 #endif

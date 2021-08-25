@@ -181,7 +181,6 @@ void PathCreator::path_create(bool is_search) {
       path_t.push_back(255);
       return;
     }
-    // auto tmp = lgc->vector_dist.size();
     const float position = lgc->getDistVector(x, y, now_dir);
 
     if (b1) {

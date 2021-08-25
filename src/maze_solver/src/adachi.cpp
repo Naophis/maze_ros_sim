@@ -28,10 +28,10 @@ void Adachi::setNextDirection(int x2, int y2, int dir, int &next_dir,
       val = dist;
     }
   } else {
-    //  if (!isWall && !step2) {
-    //    next_dir = dir;
-    //    val = dist; //未探索有線固定
-    //  } else
+     if (!isWall && !step2) {
+       next_dir = dir;
+       val = dist; //未探索有線固定
+     } else
     if (!isWall && !step && dist < val) {
       next_dir = dir;
       val = dist;
@@ -193,6 +193,8 @@ int Adachi::exec() {
   if (!goaled) {
     pt_list.clear();
   }
+  // subgoal_list.clear();
+  subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
   lgc->update_dist_map(0, goaled); // search
   deadEnd();
   if (goaled) {
@@ -200,39 +202,46 @@ int Adachi::exec() {
       if (lgc->is_stepped(next_goal_pt.x, next_goal_pt.y) ||
           lgc->candidate_end(next_goal_pt.x, next_goal_pt.y) ||
           lgc->get_dist_val(next_goal_pt.x, next_goal_pt.y) > limit) {
-
-        if (pt_list.size() == 0) {
+        {
           lgc->set_param1();
-          calc_cnt += lgc->searchGoalPosition(true, pt_list);
+          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
           cost_mode = 1;
         }
-        if (pt_list.size() == 0) {
+        if (subgoal_list.size() == 0) {
           lgc->set_param2();
-          calc_cnt += lgc->searchGoalPosition(true, pt_list);
+          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
           cost_mode = 2;
         }
-        // if (pt_list.size() == 0) {
-        //   lgc->set_param5();
-        //   calc_cnt += lgc->searchGoalPosition(true, pt_list);
-        //   cost_mode = 5;
-        // }
-        // if (pt_list.size() == 0) {
-        //   lgc->set_param3();
-        //   calc_cnt += lgc->searchGoalPosition(true, pt_list);
-        //   cost_mode = 3;
-        // }
+        if (subgoal_list.size() == 0) {
+          lgc->set_param5();
+          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
+          cost_mode = 5;
+        }
+        if (subgoal_list.size() == 0) {
+          lgc->set_param3();
+          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
+          cost_mode = 3;
+        }
+        if (subgoal_list.size() == 0) {
+          lgc->set_param4();
+          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
+          cost_mode = 4;
+        }
 
-        // if (pt_list.size() == 0) {
-        //   lgc->set_param4();
-        //   calc_cnt += lgc->searchGoalPosition(true, pt_list);
-        //   cost_mode = 4;
-        // }
-
-        if (pt_list.size() == 0) {
+        if (subgoal_list.size() == 0) {
           pt_list.clear();
           point_t tmp_p;
           tmp_p.x = tmp_p.y = 0;
           pt_list.push_back(tmp_p);
+        } else {
+          pt_list.clear();
+          point_t tmp_p;
+          for (auto itr = subgoal_list.begin(); itr != subgoal_list.end();
+               ++itr) {
+            tmp_p.x = itr->first % lgc->maze_size;
+            tmp_p.y = itr->first / lgc->maze_size;
+            pt_list.push_back(tmp_p);
+          }
         }
 
         lgc->set_goal_pos2(pt_list);
@@ -245,7 +254,7 @@ int Adachi::exec() {
 
   if (goal_startpos_lock)
     if (ego->x == 0 && ego->y == 0) {
-      calc_cnt += lgc->searchGoalPosition(false, pt_list);
+      calc_cnt += lgc->searchGoalPosition(false, subgoal_list);
       lgc->update_dist_map(1, false); // search
       return 0;
     }

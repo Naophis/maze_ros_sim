@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define checkQlength 256
+constexpr int checkQlength = 256;
 class PathCreator {
 private:
   int get_dist_val(int x, int y);

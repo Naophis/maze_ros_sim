@@ -124,7 +124,7 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-015-1996.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-016-1997.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-017-1998.yaml" />  -->
-    <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-018-1999.yaml" />  -->
+    <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-018-1999.yaml" /> 
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu2017.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/cut.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/dame.yaml" />  -->
@@ -504,7 +504,7 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2017hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2018hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2018hes.yaml" />  -->
-    <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2019hef.yaml" /> 
+    <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2019hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2019hes.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2014hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2015hef.yaml" />  -->

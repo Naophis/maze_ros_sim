@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "maze_solver.hpp"
+#include <unordered_map>
 
 using namespace std;
 
@@ -54,10 +55,18 @@ public:
   int get_max_step_val();
 
   unsigned int updateVectorMap(const bool isSearch);
+  unsigned int
+  updateVectorMap(const bool isSearch,
+                  unordered_map<unsigned int, unsigned char> &subgoal_list);
+  unsigned int
+  searchGoalPosition(const bool isSearch,
+                     unordered_map<unsigned int, unsigned char> &subgoal_list);
 
   bool candidate_end(const int x, const int y);
 
   int clear_vector_distmap();
+  int clear_vector_distmap(
+      unordered_map<unsigned int, unsigned char> &subgoal_list);
 
   int haveVectorLv(const int x, const int y, const int dir);
 

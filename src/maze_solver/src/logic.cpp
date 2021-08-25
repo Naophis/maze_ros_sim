@@ -342,6 +342,79 @@ int MazeSolverBaseLgc::clear_vector_distmap() {
   return tail;
 }
 
+int MazeSolverBaseLgc::clear_vector_distmap(
+    unordered_map<unsigned int, unsigned char> &subgoal_list) {
+  int tail = 0;
+  for (char i = 0; i < maze_size; i++) {
+    for (char j = 0; j < maze_size; j++) {
+      int idx = i + j * maze_size;
+      if (vector_dist[idx].n == vector_max_step_val)
+        subgoal_list.erase(idx);
+      vector_dist[idx].n = vector_max_step_val;
+      vector_dist[idx].e = vector_max_step_val;
+      vector_dist[idx].w = vector_max_step_val;
+      vector_dist[idx].s = vector_max_step_val;
+      vector_dist[idx].step = 0;
+      vector_dist[idx].v = 0;
+      vector_dist[idx].N1 = 0;
+      vector_dist[idx].E1 = 0;
+      vector_dist[idx].W1 = 0;
+      vector_dist[idx].NE = 0;
+      vector_dist[idx].NW = 0;
+      vector_dist[idx].SE = 0;
+      vector_dist[idx].SW = 0;
+      updateMap[idx] = 0;
+    }
+  }
+  int vq_list_size = vq_list.size();
+  for (int i = 0; i < vq_list_size; i++)
+    vq_list[i].x = vq_list[i].y = vq_list[i].dir = vq_list[i].dist2 = 0;
+
+  for (const auto p : goal_list) {
+    unsigned char x = p.x;
+    unsigned char y = p.y;
+    int idx = x + y * maze_size;
+    if (!existWall(x, y, North)) {
+      vector_dist[idx].n = 0;
+      vq_list[tail].x = x;
+      vq_list[tail].y = y;
+      vq_list[tail].dir = North;
+      tail++;
+      if (y < maze_size - 1)
+        vector_dist[(x) + (y + 1) * maze_size].s = 0;
+    }
+    if (!existWall(x, y, East)) {
+      vector_dist[idx].e = 0;
+      vq_list[tail].x = x;
+      vq_list[tail].y = y;
+      vq_list[tail].dir = East;
+      tail++;
+      if (x < maze_size - 1)
+        vector_dist[(x + 1) + (y)*maze_size].w = 0;
+    }
+    if (!existWall(x, y, West)) {
+      vector_dist[idx].w = 0;
+      vq_list[tail].x = x;
+      vq_list[tail].y = y;
+      vq_list[tail].dir = West;
+      tail++;
+      if (x > 0)
+        vector_dist[(x - 1) + (y)*maze_size].e = 0;
+    }
+    if (!existWall(x, y, South)) {
+      vector_dist[idx].s = 0;
+      vq_list[tail].x = x;
+      vq_list[tail].y = y;
+      vq_list[tail].dir = South;
+      tail++;
+      if (y > 0)
+        vector_dist[(x) + (y - 1) * maze_size].n = 0;
+    }
+  }
+
+  return tail;
+}
+
 int MazeSolverBaseLgc::haveVectorLv(const int x, const int y, const int dir) {
   const int idx = x + y * maze_size;
   if (dir == North) {
@@ -658,6 +731,118 @@ unsigned int MazeSolverBaseLgc::updateVectorMap(const bool isSearch) {
   return c;
 }
 
+unsigned int MazeSolverBaseLgc::updateVectorMap(
+    const bool isSearch,
+    unordered_map<unsigned int, unsigned char> &subgoal_list) {
+  unsigned int head = 0;
+  unsigned int tail = clear_vector_distmap(subgoal_list);
+  unsigned int c = 0;
+
+  while (head != tail) {
+    int X = vq_list[head].x;
+    int Y = vq_list[head].y;
+
+    if ((map[X + Y * maze_size] & 0xf0) == 0xf0) {
+      subgoal_list.erase(X + Y * maze_size);
+    }
+
+    int dir = vq_list[head].dir;
+    int i = 0;
+    int j = 0;
+    int d[3];
+    int d2[3];
+    float now = getDistV(X, Y, dir);
+    if (dir == North) {
+      j = 1;
+      d[0] = North;     // N
+      d[1] = NorthEast; // NE
+      d[2] = NorthWest; // NW
+      d2[0] = North;    // N
+      d2[1] = East;     // E
+      d2[2] = West;     // W
+    } else if (dir == East) {
+      i = 1;
+      d[0] = East;      // E
+      d[1] = SouthEast; // SE
+      d[2] = NorthEast; // NE
+      d2[0] = East;     // E
+      d2[1] = South;    // S
+      d2[2] = North;    // N
+    } else if (dir == West) {
+      i = -1;
+      d[0] = West;      // W
+      d[1] = NorthWest; // NW
+      d[2] = SouthWest; // SW
+      d2[0] = West;     // W
+      d2[1] = North;    // N
+      d2[2] = South;    // S
+    } else if (dir == South) {
+      j = -1;
+      d[0] = South;     // S
+      d[1] = SouthWest; // SW
+      d[2] = SouthEast; // SE
+      d2[0] = South;    // S
+      d2[1] = West;     // W
+      d2[2] = East;     // E
+    }
+    // c++;
+    for (int k = 0; k < 3; k++) {
+      c++;
+
+      if (!existWall(X + i, Y + j, d2[k]) &&
+          (isSearch || isStep(X + i, Y + j, d2[k]))) {
+        int v = haveVectorLv(X, Y, d[k]);
+        float tmp = now;
+        if (dir == d2[k]) {
+          if (v >= 2) {
+            tmp += St3;
+          } else if (v == 1) {
+            tmp += St2;
+          } else {
+            tmp += St1;
+          }
+          if (tmp <= getDistV(X + i, Y + j, d2[k])) {
+            if (!isUpdated(X + i, Y + j, d2[k])) {
+              setDistV(X + i, Y + j, d2[k], tmp);
+              vq_list[tail].x = (X + i);
+              vq_list[tail].y = (Y + j);
+              vq_list[tail].dir = d2[k];
+              vq_list[tail].dist2 = tmp;
+              simplesort(tail);
+              tail++;
+              updateMapCheck(X + i, Y + j, d2[k]);
+            }
+          }
+          addVector(X + i, Y + j, d[k], getVector(X, Y, d[k]));
+        } else {
+          if (v == 2) {
+            tmp += Dia3;
+          } else if (v == 1) {
+            tmp += Dia2;
+          } else {
+            tmp += Dia;
+          }
+          if (tmp <= getDistV(X + i, Y + j, d2[k])) {
+            if (!isUpdated(X + i, Y + j, d2[k])) {
+              setDistV(X + i, Y + j, d2[k], tmp);
+              vq_list[tail].x = (X + i);
+              vq_list[tail].y = (Y + j);
+              vq_list[tail].dir = d2[k];
+              vq_list[tail].dist2 = tmp;
+              simplesort(tail);
+              tail++;
+              updateMapCheck(X + i, Y + j, d2[k]);
+            }
+          }
+          addVector(X + i, Y + j, d[k], getVector(X, Y, d[k]));
+        }
+      }
+    }
+    head++;
+  }
+  return c;
+}
+
 bool MazeSolverBaseLgc::is_stepped(int x, int y) {
   if (valid_map_list_idx(x, y))
     return ((map[x + y * maze_size]) & 0xf0) == 0xf0;
@@ -705,6 +890,7 @@ bool MazeSolverBaseLgc::arrival_goal_position(const int x, const int y) {
 
 unsigned int MazeSolverBaseLgc::searchGoalPosition(const bool isSearch,
                                                    vector<point_t> &pt_list) {
+
   int next_dir = North;
   int now_dir = North;
   int x = 0;
@@ -760,6 +946,71 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(const bool isSearch,
         pt.y = y - 1;
         pt_list.push_back(pt);
       }
+    }
+
+    if (next_dir == North)
+      y++;
+    else if (next_dir == East)
+      x++;
+    else if (next_dir == West)
+      x--;
+    else if (next_dir == South)
+      y--;
+
+    if (next_dir == 255)
+      break;
+  }
+  // pt_list.erase(std::unique(pt_list.begin(), pt_list.end()), pt_list.end());
+
+  return cnt;
+}
+
+unsigned int MazeSolverBaseLgc::searchGoalPosition(
+    const bool isSearch,
+    unordered_map<unsigned int, unsigned char> &subgoal_list) {
+  int next_dir = North;
+  int now_dir = North;
+  int x = 0;
+  int y = 0;
+  int position = 0;
+  int idx;
+  float Value;
+
+  point_t pt;
+  pt.x = 0;
+  pt.y = 0;
+  search_log.clear();
+  unsigned int cnt = updateVectorMap(isSearch, subgoal_list);
+  while (true) {
+    now_dir = next_dir;
+    Value = VectorMax;
+    next_dir = 255;
+    pt.x = x;
+    pt.y = y;
+    search_log.push_back(pt);
+
+    if (arrival_goal_position(x, y))
+      break;
+
+    const unsigned int position = getDistVector(x, y, now_dir);
+
+    setNextRootDirectionPathUnKnown(x, y, North, now_dir, next_dir, Value);
+    setNextRootDirectionPathUnKnown(x, y, East, now_dir, next_dir, Value);
+    setNextRootDirectionPathUnKnown(x, y, West, now_dir, next_dir, Value);
+    setNextRootDirectionPathUnKnown(x, y, South, now_dir, next_dir, Value);
+
+    if (next_dir == North) {
+      if (is_unknown(x, y, North))
+        subgoal_list[x + (y + 1) * maze_size] = 1;
+    } else if (next_dir == East) {
+      if (is_unknown(x, y, East))
+        subgoal_list[x + 1 + (y)*maze_size] = 1;
+    } else if (next_dir == West) {
+      if (is_unknown(x, y, West))
+        subgoal_list[x - 1 + (y)*maze_size] = 1;
+    } else if (next_dir == South) {
+      if (is_unknown(x, y, South))
+        subgoal_list[x + (y - 1) * maze_size] = 1;
     }
 
     if (next_dir == North)

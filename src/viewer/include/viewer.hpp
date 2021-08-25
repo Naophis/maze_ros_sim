@@ -14,9 +14,9 @@ using namespace visualization_msgs;
 using namespace interactive_markers;
 using namespace jsk_rviz_plugins;
 
-#define MAX_LOOP 5
-#define MAX_MAZE_SIZE 32
-#define TXT_BUF 256
+constexpr char MAX_LOOP = 5;
+constexpr char MAX_MAZE_SIZE = 32;
+constexpr int TXT_BUF = 256;
 
 typedef struct {
   int x;
