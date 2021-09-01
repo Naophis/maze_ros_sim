@@ -6,29 +6,51 @@
 void MazeSolverCtrl::update_sensing_result() {
   int x = ego.x;
   int y = ego.y;
-  int dir = ego.dir;
-  char north_wall = existWall_from_premap(x, y, North);
-  char east_wall = existWall_from_premap(x, y, East);
-  char west_wall = existWall_from_premap(x, y, West);
-  char south_wall = existWall_from_premap(x, y, South);
+  char north_wall = existWall_from_premap(x, y, Direction::North);
+  char east_wall = existWall_from_premap(x, y, Direction::East);
+  char west_wall = existWall_from_premap(x, y, Direction::West);
+  char south_wall = existWall_from_premap(x, y, Direction::South);
 
-  lgc.set_wall_data(x, y, North, north_wall);
-  lgc.set_wall_data(x, y + 1, South, north_wall);
+  lgc.set_wall_data(x, y, Direction::North, north_wall);
+  lgc.set_wall_data(x, y + 1, Direction::South, north_wall);
 
-  lgc.set_wall_data(x, y, East, east_wall);
-  lgc.set_wall_data(x + 1, y, West, east_wall);
+  lgc.set_wall_data(x, y, Direction::East, east_wall);
+  lgc.set_wall_data(x + 1, y, Direction::West, east_wall);
 
-  lgc.set_wall_data(x, y, West, west_wall);
-  lgc.set_wall_data(x - 1, y, East, west_wall);
+  lgc.set_wall_data(x, y, Direction::West, west_wall);
+  lgc.set_wall_data(x - 1, y, Direction::East, west_wall);
 
-  lgc.set_wall_data(x, y, South, south_wall);
-  lgc.set_wall_data(x, y - 1, North, south_wall);
+  lgc.set_wall_data(x, y, Direction::South, south_wall);
+  lgc.set_wall_data(x, y - 1, Direction::North, south_wall);
 }
 
-bool MazeSolverCtrl::existWall_from_premap(int x, int y, int dir) {
+void MazeSolverCtrl::update_sensing_result2() {
+  for (int x = 0; x < maze_size; x++) {
+    for (int y = 0; y < maze_size; y++) {
+      char north_wall = existWall_from_premap(x, y, Direction::North);
+      char east_wall = existWall_from_premap(x, y, Direction::East);
+      char west_wall = existWall_from_premap(x, y, Direction::West);
+      char south_wall = existWall_from_premap(x, y, Direction::South);
+
+      lgc.set_wall_data(x, y, Direction::North, north_wall);
+      lgc.set_wall_data(x, y + 1, Direction::South, north_wall);
+
+      lgc.set_wall_data(x, y, Direction::East, east_wall);
+      lgc.set_wall_data(x + 1, y, Direction::West, east_wall);
+
+      lgc.set_wall_data(x, y, Direction::West, west_wall);
+      lgc.set_wall_data(x - 1, y, Direction::East, west_wall);
+
+      lgc.set_wall_data(x, y, Direction::South, south_wall);
+      lgc.set_wall_data(x, y - 1, Direction::North, south_wall);
+    }
+  }
+}
+
+bool MazeSolverCtrl::existWall_from_premap(int x, int y, Direction dir) {
   if (x < 0 || x >= maze_size || y < 0 || y >= maze_size)
     return true;
-  return ((pre_map_data[x][y] / dir) & 0x01) == 0x01;
+  return ((pre_map_data[x][y] / static_cast<int>(dir)) & 0x01) == 0x01;
 }
 
 void MazeSolverCtrl::timer_callback(const ros::TimerEvent &e) {
@@ -43,7 +65,44 @@ void MazeSolverCtrl::timer_callback(const ros::TimerEvent &e) {
   mz.dia_dist_e.resize(maze_size * maze_size);
 
   mz.maze_size = maze_size;
-  mz.motion = adachi.exec();
+  path_type path;
+
+  if (maze_known) {
+    update_sensing_result2();
+    maze_known = false;
+  }
+
+  mz.motion = adachi.exec(path);
+  Motion next_motion = static_cast<Motion>(mz.motion);
+  {
+    my_msg::base_path bp;
+    my_msg::base_path_element ele;
+    bp.paths.clear();
+    bp.size = 0;
+    if (next_motion == Motion::Straight) {
+      ele.s = 2;
+      ele.t = static_cast<int>(PathMotion::End);
+      bp.paths.push_back(ele);
+    } else if (next_motion == Motion::TurnRight) {
+      ele.s = 0;
+      ele.t = static_cast<int>(PathMotion::Right);
+      bp.paths.push_back(ele);
+    } else if (next_motion == Motion::TurnLeft) {
+      ele.s = 0;
+      ele.t = static_cast<int>(PathMotion::Left);
+      bp.paths.push_back(ele);
+    } else if (next_motion == Motion::Back) {
+      ele.s = 1;
+      ele.t = static_cast<int>(PathMotion::Pivot180);
+      bp.paths.push_back(ele);
+      ele.s = 1;
+      ele.t = static_cast<int>(PathMotion::End);
+      bp.paths.push_back(ele);
+    }
+    bp.size = bp.paths.size();
+    pub_base_path.publish(bp);
+  }
+
   mz.cost_mode = adachi.cost_mode;
 
   for (int i = 0; i < maze_size; i++) {
@@ -57,7 +116,7 @@ void MazeSolverCtrl::timer_callback(const ros::TimerEvent &e) {
 
   mz.ego.pos_x = adachi.ego->x;
   mz.ego.pos_y = adachi.ego->y;
-  mz.ego.dir = adachi.ego->dir;
+  mz.ego.dir = static_cast<int>(adachi.ego->dir);
 
   pub_maze_data.publish(mz);
 }
@@ -71,13 +130,14 @@ void MazeSolverCtrl::init() {
   lgc.set_default_wall_data();
   ego.x = 0;
   ego.y = 0;
-  ego.dir = North;
+  ego.dir = Direction::North;
   update_sensing_result();
   ego.y++;
 
-  timer = _nh.createTimer(ros::Duration(0.1), &MazeSolverCtrl::timer_callback,
+  timer = _nh.createTimer(ros::Duration(0.2), &MazeSolverCtrl::timer_callback,
                           this);
   pub_maze_data = _nh.advertise<my_msg::maze>("/maze", 1);
+  pub_base_path = _nh.advertise<my_msg::base_path>("/base_path", 1);
 }
 void MazeSolverCtrl::set_meta_maze_data() {
   XmlRpc::XmlRpcValue prm;
@@ -87,6 +147,9 @@ void MazeSolverCtrl::set_meta_maze_data() {
   if (!(prm["wall"].valid() && prm["maze_size"].valid())) {
     ROS_WARN("rosparam /maze_data is not found");
     return;
+  }
+  if (prm["known"].valid()) {
+    maze_known = static_cast<int>(prm["known"]) > 0;
   }
   maze_size = static_cast<int>(prm["maze_size"]);
   max_step_val = static_cast<int>(prm["max_step_val"]);

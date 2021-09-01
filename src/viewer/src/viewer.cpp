@@ -5,7 +5,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 void Viewer::timer_callback(const ros::TimerEvent &e) {
-  craete_wall(e);
+  craete_wall();
 
   create_maze_info();
   pub_maze_info.publish(maze_info_list[loop]);
@@ -15,7 +15,8 @@ void Viewer::timer_callback(const ros::TimerEvent &e) {
     pub_maze_diainfo.publish(maze_diainfo_list[loop]);
   }
 
-  create_ego_marker();
+  // create_ego_marker();
+  create_ego_marker2();
   pub_ego_marker.publish(ego_marker_list[loop]);
 
   if (initflag2) {
@@ -43,7 +44,7 @@ void Viewer::timer_callback(const ros::TimerEvent &e) {
     // Line list is red
 
     float f = 0.0;
-    const double z = -0.3;
+    const double z = -0.001;
     double alpha = 0.65;
 
     line_list.color.r = 0.5;
@@ -188,6 +189,69 @@ void Viewer::create_ego_marker() {
   ego_marker_list[loop]->markers.emplace_back(mk);
 }
 
+void Viewer::create_ego_marker2() {
+  ego_marker_list[loop]->markers.resize(1);
+  ego_marker_list[loop]->markers[0].action = Marker::DELETEALL;
+
+  Marker mk;
+  mk.id = 0;
+  mk.ns = "map";
+  mk.header.frame_id = "ego";
+  mk.header.stamp = ros::Time::now();
+  mk.type = Marker::ARROW;
+  mk.action = Marker::ADD;
+  mk.color.r = 0;
+  mk.color.g = 1;
+  mk.color.b = 1;
+  mk.color.a = 1;
+  tf::Quaternion quat = tf::createQuaternionFromRPY(0, 0, 0);
+  mk.pose.position.x = 0;
+  mk.pose.position.y = 0;
+  mk.pose.position.z = 0;
+  mk.pose.orientation.x = quat[0];
+  mk.pose.orientation.y = quat[1];
+  mk.pose.orientation.z = quat[2];
+  mk.pose.orientation.w = quat[3];
+  mk.scale.x = 0.05;
+  mk.scale.y = 0.05;
+  mk.scale.z = 0.05;
+  ego_marker_list[loop]->markers.emplace_back(mk);
+
+  double x1 = cell_size / 2 + cell_size * ego.x;
+  double y1 = cell_size / 2 + cell_size * ego.y;
+  double ang = 0;
+
+  if (ego_dir == 1) {
+    ang = 3.14 / 2;
+    y1 -= cell_size / 2;
+  } else if (ego_dir == 2) {
+    ang = 0;
+    x1 -= cell_size / 2;
+  } else if (ego_dir == 4) {
+    ang = 3.14;
+    x1 += cell_size / 2;
+  } else if (ego_dir == 8) {
+    ang = -3.14 / 2;
+    y1 += cell_size / 2;
+  }
+
+  geometry_msgs::TransformStamped transformStamped;
+  transformStamped.header.stamp = ros::Time::now();
+  transformStamped.header.frame_id = "map";
+  transformStamped.child_frame_id = "ego";
+  transformStamped.transform.translation.x = x1 / 1000;
+  transformStamped.transform.translation.y = y1 / 1000;
+  transformStamped.transform.translation.z = 0.0;
+
+  tf2::Quaternion q;
+  q.setRPY(0, 0, ang);
+  transformStamped.transform.rotation.x = q.x();
+  transformStamped.transform.rotation.y = q.y();
+  transformStamped.transform.rotation.z = q.z();
+  transformStamped.transform.rotation.w = q.w();
+  dynamic_br_.sendTransform(transformStamped);
+}
+
 void Viewer::create_maze_diainfo() {
   maze_diainfo_list[loop]->markers.resize(1);
   maze_diainfo_list[loop]->markers[0].action = Marker::DELETEALL;
@@ -252,7 +316,7 @@ void Viewer::create_maze_info2(double x, double y, int &id, int dir) {
   mk.pose.position.x = (x1 + x2) / 1000;
   mk.pose.position.y = (y1 + y2) / 1000;
   mk.pose.position.z = 0.07;
-  mk.pose.position.z = -0.2;
+  mk.pose.position.z = -0.001;
   mk.pose.orientation.x = quat[0];
   mk.pose.orientation.y = quat[1];
   mk.pose.orientation.z = quat[2];
@@ -300,6 +364,7 @@ void Viewer::create_maze_info() {
       mk.color.g = 0.5;
       mk.color.b = 0;
       mk.color.a = 1;
+      mk.scale.z = 0.05;
 
       if ((map[x][y] & 0xf0) == 0xf0) {
         mk.color.r = 0;
@@ -307,17 +372,27 @@ void Viewer::create_maze_info() {
         mk.color.b = 0;
         mk.color.a = 1;
       }
+      if (dist[x][y] == 0) {
+        mk.color.r = 1;
+        mk.color.g = 1;
+        mk.color.b = 0;
+        mk.scale.z = 0.1;
+      }
 
       mk.pose.position.x = (x1 + x2) / 1000;
       mk.pose.position.y = (y1 + y2) / 1000;
-      mk.pose.position.z = -0.2;
+      mk.pose.position.z = -0.001;
       mk.pose.orientation.x = quat[0];
       mk.pose.orientation.y = quat[1];
       mk.pose.orientation.z = quat[2];
       mk.pose.orientation.w = quat[3];
-      mk.scale.z = 0.05;
+
       snprintf(buf, TXT_BUF, "%d", dist[x][y]);
-      mk.text = &buf[0];
+      if (dist[x][y] == 0) {
+        mk.text = "G";
+      } else {
+        mk.text = &buf[0];
+      }
       maze_info_list[loop]->markers.emplace_back(mk);
       if (x < maze_size && (map[x][y] & 0x02) == 0x00)
         create_maze_info2(x, y, id, 2);
@@ -360,6 +435,13 @@ void Viewer::init() {
   pub_ego_marker = _nh.advertise<MarkerArray>("/viewer/ego_marker", 1);
 
   pub_path_marker = _nh.advertise<Marker>("/viewer/path_marker", 1);
+
+  for (int i = 0; i < 4; i++) {
+    wall_list[0].reset(new MarkerArray);
+    wall_list[0]->markers.resize(1);
+    wall_list[0]->markers[0].action = Marker::DELETEALL;
+    pub_wall_list[i].publish(wall_list[0]);
+  }
 }
 void Viewer::add_wall(int x, int y, int &idx, int dir) {
 
@@ -495,7 +577,7 @@ void Viewer::add_maze_base(int idx) {
 
   wall_list[loop]->markers.emplace_back(mk);
 }
-void Viewer::craete_wall(const ros::TimerEvent &e) {
+void Viewer::craete_wall() {
 
   wall_list[loop]->markers.resize(1);
   wall_list[loop]->markers[0].action = Marker::DELETEALL;
@@ -507,31 +589,31 @@ void Viewer::craete_wall(const ros::TimerEvent &e) {
   int x_max = maze_size;
   int y_max = maze_size;
   int mode = 0;
-  if (x < (maze_size / 2) && y < (maze_size / 2)) {
-    mode = 0;
-    x_min = 0;
-    y_min = 0;
-    x_max = maze_size / 2;
-    y_max = maze_size / 2;
-  } else if (x < (maze_size / 2) && y >= (maze_size / 2)) {
-    mode = 1;
-    x_min = 0;
-    y_min = maze_size / 2;
-    x_max = maze_size / 2;
-    y_max = maze_size;
-  } else if (x >= (maze_size / 2) && y < (maze_size / 2)) {
-    mode = 2;
-    x_min = maze_size / 2;
-    y_min = 0;
-    x_max = maze_size;
-    y_max = maze_size / 2;
-  } else if (x >= (maze_size / 2) && y >= (maze_size / 2)) {
-    mode = 3;
-    x_min = maze_size / 2;
-    y_min = maze_size / 2;
-    x_max = maze_size;
-    y_max = maze_size;
-  }
+  // if (x < (maze_size / 2) && y < (maze_size / 2)) {
+  //   mode = 0;
+  //   x_min = 0;
+  //   y_min = 0;
+  //   x_max = maze_size / 2;
+  //   y_max = maze_size / 2;
+  // } else if (x < (maze_size / 2) && y >= (maze_size / 2)) {
+  //   mode = 1;
+  //   x_min = 0;
+  //   y_min = maze_size / 2;
+  //   x_max = maze_size / 2;
+  //   y_max = maze_size;
+  // } else if (x >= (maze_size / 2) && y < (maze_size / 2)) {
+  //   mode = 2;
+  //   x_min = maze_size / 2;
+  //   y_min = 0;
+  //   x_max = maze_size;
+  //   y_max = maze_size / 2;
+  // } else if (x >= (maze_size / 2) && y >= (maze_size / 2)) {
+  //   mode = 3;
+  //   x_min = maze_size / 2;
+  //   y_min = maze_size / 2;
+  //   x_max = maze_size;
+  //   y_max = maze_size;
+  // }
 
   int c = 2;
   for (int i = x_min; i < x_max; i++) {

@@ -10,6 +10,8 @@ add_message_files(
   FILES
   maze.msg
   ego.msg
+  base_path_element.msg
+  base_path.msg
   path.msg
 )
 generate_messages(

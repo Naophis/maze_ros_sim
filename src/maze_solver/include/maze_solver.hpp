@@ -1,26 +1,11 @@
 #ifndef MAZE_SOLVER_H
 #define MAZE_SOLVER_H
 
-#define MAX_MAZE_SIZE 32
+#include "stdio.h"
+#include <vector>
 
-typedef struct {
-  unsigned char x;
-  unsigned char y;
-} point_t;
-
-typedef struct {
-  unsigned char x;
-  unsigned char y;
-  unsigned char dir;
-  float dist2;
-} dir_pt_t;
-
-typedef struct {
-  unsigned char x;
-  unsigned char y;
-  unsigned char dir;
-  unsigned char prev_motion;
-} ego_t;
+using namespace std;
+constexpr unsigned char MAX_MAZE_SIZE = 32;
 
 typedef struct {
   float n;
@@ -39,7 +24,7 @@ typedef struct {
   unsigned int step : 4;
 } vector_map_t;
 
-enum {
+enum class Direction : int {
   North = 1,
   East = 2,
   NorthEast = 3,
@@ -48,19 +33,73 @@ enum {
   SouthEast = 6,
   SouthWest = 7,
   South = 8,
-} enum_Direction;
+  Undefined = 255,
+  Null = 0
+};
 
-enum {
+enum class Motion : int {
   NONE = 0,
   Straight = 1,
-  Right = 2,
-  Left = 3,
+  TurnRight = 2,
+  TurnLeft = 3,
   Back = 4,
-} enum_Motion;
+};
 
-enum {
-  TURN_RIGHT = 1,
-  TURN_LEFT = 2,
-} enum_TURN_MOTION;
+enum class TurnDirection : int {
+  Right = 1,
+  Left = 2,
+  Pivot180 = 128,
+  End = 256
+};
 
+enum class PathMotion : int {
+  Right = 1,
+  Left = 2,
+  Pivot180 = 128,
+  End = 255,
+};
+
+typedef struct {
+  vector<float> s;
+  vector<int> t;
+  int size;
+} path_type;
+
+typedef struct {
+  unsigned char x;
+  unsigned char y;
+} point_t;
+
+typedef struct {
+  unsigned char x;
+  unsigned char y;
+  Direction dir;
+  float dist2;
+} dir_pt_t;
+
+typedef struct {
+  unsigned char x;
+  unsigned char y;
+  Direction dir;
+  unsigned char prev_motion;
+} ego_t;
+
+typedef struct {
+  float s;
+  unsigned char t;
+} path_element;
+
+typedef struct {
+  std::vector<path_element> paths;
+  int size;
+} path_struct;
+
+typedef struct {
+  float x;
+  float y;
+  float ang;
+} trajectory_point_t;
+
+constexpr initializer_list<Direction> direction_list = {
+    Direction::North, Direction::East, Direction::West, Direction::South};
 #endif

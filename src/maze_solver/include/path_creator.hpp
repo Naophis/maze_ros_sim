@@ -21,16 +21,17 @@ private:
   void add_path_s(int idx, float val);
   void append_path_s(float val);
   void append_path_t(int val);
-  void setNextRootDirectionPath(int x, int y, int now_dir, int dir, float &val,
-                                int &next_dir);
-  int get_next_pos(int &x, int &y, int dir, int next_direction);
+  void setNextRootDirectionPath(int x, int y, Direction now_dir, Direction dir,
+                                float &val, Direction &next_dir);
+  Direction get_next_pos(int &x, int &y, Direction dir,
+                         Direction next_direction);
 
-  int get_next_motion(int now_dir, int next_direction);
+  Motion get_next_motion(Direction now_dir, Direction next_direction);
 
-  void priorityStraight2(int x, int y, int now_dir, int dir, float &dist_val,
-                         int &next_dir);
+  void priorityStraight2(int x, int y, Direction now_dir, Direction dir,
+                         float &dist_val, Direction &next_dir);
 
-  void checkOtherRoot(int x, int y, float now, int now_dir);
+  void checkOtherRoot(int x, int y, float now, Direction now_dir);
 
   void clearCheckMap();
   void addCheckQ(int x, int y);

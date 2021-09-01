@@ -1,3 +1,7 @@
 <launch>
+    <arg name="model" default="$(find viewer)/urdf/exia.urdf" />
+    <arg name="gui" default="True" />
+    <param name="robot_description" textfile="$(arg model)" />
+    <param name="use_gui" value="$(arg gui)"/>
     <node pkg="rviz" name="rviz" type="rviz" args="-d $(find viewer)/rviz/viewer.rviz" required="true" />
 </launch>

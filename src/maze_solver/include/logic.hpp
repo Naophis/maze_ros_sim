@@ -35,18 +35,18 @@ public:
 
   void set_map_val(const int x, const int y, const int val);
 
-  bool isProceed(const int x, const int y, const int dir);
+  bool isProceed(const int x, const int y, Direction dir);
 
-  bool existWall(const int x, const int y, const int dir);
+  bool existWall(const int x, const int y, Direction dir);
 
-  void set_wall_data(const int x, const int y, const int dir,
+  void set_wall_data(const int x, const int y, Direction dir,
                      const bool isWall);
 
   void set_default_wall_data();
 
   bool valid_map_list_idx(const int x, const int y);
 
-  bool isStep(const int x, const int y, const int dir);
+  bool isStep(const int x, const int y, Direction dir);
 
   bool is_stepped(int x, int y);
 
@@ -68,19 +68,19 @@ public:
   int clear_vector_distmap(
       unordered_map<unsigned int, unsigned char> &subgoal_list);
 
-  int haveVectorLv(const int x, const int y, const int dir);
+  int haveVectorLv(const int x, const int y, Direction dir);
 
-  float getDistV(const int x, const int y, const int dir);
+  float getDistV(const int x, const int y, Direction dir);
 
-  void setDistV(const int x, const int y, const int dir, const float val);
+  void setDistV(const int x, const int y, Direction dir, const float val);
 
-  void addVector(const int x, const int y, const int dir, float val);
+  void addVector(const int x, const int y, Direction dir, float val);
 
-  bool isUpdated(const int x, const int y, const int dir);
+  bool isUpdated(const int x, const int y, Direction dir);
 
-  int getVector(const int x, const int y, const int dir);
+  int getVector(const int x, const int y, Direction dir);
 
-  void updateMapCheck(const int x, const int y, const int dir);
+  void updateMapCheck(const int x, const int y, Direction dir);
 
   void simplesort(const int tail);
 
@@ -93,18 +93,19 @@ public:
 
   void searchGoalPosition2(const bool isSearch, vector<point_t> &pt_list);
 
-  bool is_unknown(const int x, const int y, const int dir);
+  bool is_unknown(const int x, const int y, Direction dir);
 
-  void setNextRootDirectionPathUnKnown(int x, int y, int dir, int now,
-                                       int &nextDirection, float &Value);
+  void setNextRootDirectionPathUnKnown(int x, int y, Direction dir,
+                                       Direction now_dir,
+                                       Direction &nextDirection, float &Value);
 
-  float getDistVector(const int x, const int y, const int dir);
+  float getDistVector(const int x, const int y, Direction dir);
 
   bool arrival_goal_position(const int x, const int y);
 
   void set_goal_pos2(const vector<point_t> &pt_list);
 
-  void updateWall(int x, int y, int dir);
+  void updateWall(int x, int y, Direction dir);
 
   void remove_goal_pos3();
 
@@ -126,6 +127,26 @@ public:
     St1 = cell_size;
     St2 = cell_size;
     St3 = cell_size;
+  }
+  void set_param2() {
+    cell_size = 1;
+    Dia = 1;
+    Dia2 = 1;
+    Dia3 = 1;
+    St1 = 1;
+    St2 = 1;
+    St3 = 1;
+  }
+
+  void set_param3() {
+    cell_size = 90;
+    Dia = cell_size * 1.41421356 / 2;
+    Dia2 = cell_size * 1.41421356 / 2 * 3 / 5;
+    Dia3 = cell_size * 1.41421356 / 2 * 2 / 5;
+
+    St1 = cell_size;
+    St2 = cell_size * 2 / 7;
+    St3 = cell_size * 1 / 7;
   }
 
   void set_param4() {
@@ -149,28 +170,6 @@ public:
     St1 = cell_size / tmp2;
     St2 = cell_size / (tmp2 + 1);
     St3 = cell_size / (tmp2 + 3);
-  }
-
-  void set_param2() {
-    cell_size = 1;
-    Dia = 1;
-    Dia2 = 1;
-    Dia3 = 1;
-    St1 = 1;
-    St2 = 1;
-    St3 = 1;
-  }
-
-  void set_param3() {
-    cell_size = 90;
-    Dia = cell_size * 1.41421356 / 2;
-    Dia2 = cell_size * 1.41421356 / 2 * 3 / 5;
-    Dia3 = cell_size * 1.41421356 / 2 * 2 / 5;
-
-    St1 = cell_size;
-    St2 = cell_size * 2 / 7;
-    St3 = cell_size * 1 / 7;
-    set_param1();
   }
 
 private:

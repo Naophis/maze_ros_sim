@@ -28,64 +28,68 @@ void PathCreator::add_path_s(int idx, float val) {
   path_s[idx] += val; //
 }
 
-void PathCreator::setNextRootDirectionPath(int x, int y, int now_dir, int dir,
-                                           float &val, int &next_dir) {
-  bool isWall = lgc->existWall(x, y, dir);
-  bool step = lgc->isStep(x, y, dir);
-  float dist = isWall ? vector_max_step_val : lgc->getDistVector(x, y, dir);
+void PathCreator::setNextRootDirectionPath(int x, int y, Direction now_dir,
+                                           Direction dir, float &val,
+                                           Direction &next_dir) {
+  const bool isWall = lgc->existWall(x, y, dir);
+  const bool step = lgc->isStep(x, y, dir);
+  const float dist =
+      isWall ? vector_max_step_val : lgc->getDistVector(x, y, dir);
 
-  if (now_dir * dir == 8)
+  if (static_cast<int>(now_dir) * static_cast<int>(dir) == 8)
     return;
   if (!isWall && dist < val) {
     next_dir = dir;
     val = dist;
   }
 }
-int PathCreator::get_next_motion(int now_dir, int next_direction) {
+Motion PathCreator::get_next_motion(Direction now_dir,
+                                    Direction next_direction) {
   if (now_dir == next_direction)
-    return Straight;
+    return Motion::Straight;
 
-  if (now_dir == North) {
-    if (next_direction == East)
-      return Right;
-    else if (next_direction == West)
-      return Left;
-  } else if (now_dir == East) {
-    if (next_direction == South)
-      return Right;
-    else if (next_direction == North)
-      return Left;
-  } else if (now_dir == West) {
-    if (next_direction == North)
-      return Right;
-    else if (next_direction == South)
-      return Left;
-  } else if (now_dir == South) {
-    if (next_direction == West)
-      return Right;
-    else if (next_direction == East)
-      return Left;
+  if (now_dir == Direction::North) {
+    if (next_direction == Direction::East)
+      return Motion::TurnRight;
+    else if (next_direction == Direction::West)
+      return Motion::TurnLeft;
+  } else if (now_dir == Direction::East) {
+    if (next_direction == Direction::South)
+      return Motion::TurnRight;
+    else if (next_direction == Direction::North)
+      return Motion::TurnLeft;
+  } else if (now_dir == Direction::West) {
+    if (next_direction == Direction::North)
+      return Motion::TurnRight;
+    else if (next_direction == Direction::South)
+      return Motion::TurnLeft;
+  } else if (now_dir == Direction::South) {
+    if (next_direction == Direction::West)
+      return Motion::TurnRight;
+    else if (next_direction == Direction::East)
+      return Motion::TurnLeft;
   }
-  return Back;
+  return Motion::Back;
 }
-int PathCreator::get_next_pos(int &x, int &y, int dir, int next_direction) {
-  if (next_direction == 255)
-    if (dir == North)
-      next_direction = South;
-    else if (dir == East)
-      next_direction = West;
-    else if (dir == West)
-      next_direction = East;
-    else if (dir == South)
-      next_direction = North;
+Direction PathCreator::get_next_pos(int &x, int &y, Direction dir,
+                                    Direction next_direction) {
+  if (next_direction == Direction::Undefined)
+    if (dir == Direction::North)
+      next_direction = Direction::South;
+    else if (dir == Direction::East)
+      next_direction = Direction::West;
+    else if (dir == Direction::West)
+      next_direction = Direction::East;
+    else if (dir == Direction::South)
+      next_direction = Direction::North;
 
-  if (next_direction == North)
+  if (next_direction == Direction::North)
     y++;
-  else if (next_direction == East)
+  else if (next_direction == Direction::East)
     x++;
-  else if (next_direction == West)
+  else if (next_direction == Direction::West)
     x--;
-  else if (next_direction == South)
+  else if (next_direction == Direction::South)
     y--;
 
   return next_direction;
@@ -104,41 +108,43 @@ void PathCreator::addCheckQ(int x, int y) {
     }
   }
 }
-void PathCreator::checkOtherRoot(int x, int y, float now, int now_dir) {
-  int temp = 0;
-  float a[4];
-  int index = 0;
-  for (int d = 1; d <= 8; d *= 2) {
-    float dist = lgc->getDistVector(x, y, d);
-    if (now_dir * d != 8 && !lgc->existWall(x, y, d) && dist < now) {
-      temp += d;
-      a[index] = dist;
-      index++;
-    }
-  }
-  float ch = a[0];
-  for (int i = 0; i < 4; i++)
-    if (a[i] == 0)
-      continue;
-    else if (a[i] != ch)
-      ch = a[i];
+void PathCreator::checkOtherRoot(int x, int y, float now, Direction now_dir) {
+  // int temp = 0;
+  // float a[4];
+  // int index = 0;
+  // for (const auto d : direction_list) {
+  //   float dist = lgc->getDistVector(x, y, d);
+  //   if ((static_cast<int>(now_dir) * static_cast<int>(d)) != 8 &&
+  //       !lgc->existWall(x, y, d) && dist < now) {
+  //     temp += d;
+  //     a[index] = dist;
+  //     index++;
+  //   }
+  // }
+  // float ch = a[0];
+  // for (int i = 0; i < 4; i++)
+  //   if (a[i] == 0)
+  //     continue;
+  //   else if (a[i] != ch)
+  //     ch = a[i];
 
-  if (temp == 0)
-    return;
+  // if (temp == 0)
+  //   return;
 
-  if ((temp == 0x01) || (temp == 0x02) || (temp == 0x04) || (temp == 0x08)) {
-  } else {
-    checkMap[x][y] = temp;
-    addCheckQ(x, y);
-  }
+  // if ((temp == 0x01) || (temp == 0x02) || (temp == 0x04) || (temp == 0x08)) {
+  // } else {
+  //   checkMap[x][y] = temp;
+  //   addCheckQ(x, y);
+  // }
 }
 
-void PathCreator::priorityStraight2(int x, int y, int now_dir, int dir,
-                                    float &dist_val, int &next_dir) {
-  char isWall = lgc->existWall(x, y, dir);
-  char step = lgc->isStep(x, y, dir);
-  float dist = isWall ? MAX : lgc->getDistVector(x, y, dir);
-  if (now_dir * dir == 8)
+void PathCreator::priorityStraight2(int x, int y, Direction now_dir,
+                                    Direction dir, float &dist_val,
+                                    Direction &next_dir) {
+  const bool isWall = lgc->existWall(x, y, dir);
+  const bool step = lgc->isStep(x, y, dir);
+  const float dist = isWall ? MAX : lgc->getDistVector(x, y, dir);
+  if (static_cast<int>(now_dir) * static_cast<int>(dir) == 8)
     return;
   if (!isWall && step && dist <= dist_val) {
     next_dir = dir;
@@ -146,16 +152,15 @@ void PathCreator::priorityStraight2(int x, int y, int now_dir, int dir,
   }
 }
 void PathCreator::clearCheckMap() {
-  for (char i = 0; i < 16; i++)
-    for (char j = 0; j < 16; j++)
-      checkMap[i][j] = 0;
+  // for (char i = 0; i < 16; i++)
+  //   for (char j = 0; j < 16; j++)
+  //     checkMap[i][j] = 0;
 }
 void PathCreator::path_create(bool is_search) {
-  int next_dir = North;
-  int now_dir = next_dir;
-  int nextMotion = 0;
+  Direction next_dir = Direction::North;
+  Direction now_dir = next_dir;
   unsigned int idx = 0;
-  int dirLog[3];
+  Direction dirLog[3];
   bool b1 = false;
   bool b2 = false;
 
@@ -175,7 +180,7 @@ void PathCreator::path_create(bool is_search) {
     dirLog[0] = now_dir;
 
     dist_val = MAX;
-    next_dir = 255;
+    next_dir = Direction::Undefined;
 
     if (lgc->arrival_goal_position(x, y)) {
       path_t.push_back(255);
@@ -199,10 +204,14 @@ void PathCreator::path_create(bool is_search) {
       //   b2 = true;
       // }
     } else {
-      setNextRootDirectionPath(x, y, now_dir, North, dist_val, next_dir);
-      setNextRootDirectionPath(x, y, now_dir, East, dist_val, next_dir);
-      setNextRootDirectionPath(x, y, now_dir, West, dist_val, next_dir);
-      setNextRootDirectionPath(x, y, now_dir, South, dist_val, next_dir);
+      setNextRootDirectionPath(x, y, now_dir, Direction::North, dist_val,
+                               next_dir);
+      setNextRootDirectionPath(x, y, now_dir, Direction::East, dist_val,
+                               next_dir);
+      setNextRootDirectionPath(x, y, now_dir, Direction::West, dist_val,
+                               next_dir);
+      setNextRootDirectionPath(x, y, now_dir, Direction::South, dist_val,
+                               next_dir);
       if (dirLog[0] == dirLog[1] || dirLog[0] != dirLog[2]) {
         priorityStraight2(x, y, now_dir, dirLog[0], dist_val, next_dir);
       } else {
@@ -210,19 +219,19 @@ void PathCreator::path_create(bool is_search) {
       }
     }
 
-    int nextMotion = get_next_motion(now_dir, next_dir);
+    Motion nextMotion = get_next_motion(now_dir, next_dir);
 
     // ROS_WARN("%d, %d, %d", position, now_dir, next_dir);
     // checkOtherRoot(x, y, position, now_dir);
 
-    if (nextMotion == Straight) {
+    if (nextMotion == Motion::Straight) {
       add_path_s(idx, 2);
-    } else if (nextMotion == Right) {
-      path_t.push_back(TURN_RIGHT);
+    } else if (nextMotion == Motion::TurnRight) {
+      path_t.push_back(static_cast<int>(TurnDirection::Right));
       path_s.push_back(2);
       idx++;
-    } else if (nextMotion == Left) {
-      path_t.push_back(TURN_LEFT);
+    } else if (nextMotion == Motion::TurnLeft) {
+      path_t.push_back(static_cast<int>(TurnDirection::Left));
       path_s.push_back(2);
       idx++;
     } else {

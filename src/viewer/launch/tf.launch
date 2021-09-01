@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="rviz" name="rviz" type="rviz" args="-d $(find viewer)/rviz/viewer.rviz" required="true" />
+    <!-- <node pkg="rviz" name="rviz" type="rviz" args="-d $(find viewer)/rviz/viewer.rviz" required="true" /> -->
     <node pkg="tf" type="static_transform_publisher" name="world_map" args="0 0 0.2 0 0 0 world map 10" />
     <node pkg="tf" type="static_transform_publisher" name="world_base" args="0 0 0.2 0 0 0 world base 10" />
     <node pkg="tf" type="static_transform_publisher" name="world_baselink" args="0 0 0.2 0 0 0 world base_link 10" />

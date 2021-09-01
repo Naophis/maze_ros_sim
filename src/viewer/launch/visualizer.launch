@@ -10,7 +10,7 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/Kyushu2014_MMC.yaml" /> -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/AJMM2014_MMC_FINAL.yaml" /> -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/APEC2015_MMC.yaml" /> -->
-    <!-- <rosparam command="load" file="$(find maze_solver)/config/AJMM2015_MMC_FINAL.yaml" /> -->
+    <rosparam command="load" file="$(find maze_solver)/config/AJMM2015_MMC_FINAL.yaml" />
     <!-- <rosparam command="load" file="$(find maze_solver)/config/AJMM2015_MMC_preliminary.yaml" /> -->
 
     <!-- <rosparam command="load" file="$(find maze_solver)/config/Tohoku2016_MMC.yaml" /> -->
@@ -18,6 +18,7 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/AJMM2018_MMC.yaml" /> -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/AJMM2020_MMH.yaml" />  -->
 
+    <!-- <rosparam command="load" file="$(find maze_solver)/config/straight.yaml" /> -->
 
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/13ye.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/50.yaml" />  -->
@@ -124,7 +125,7 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-015-1996.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-016-1997.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-017-1998.yaml" />  -->
-    <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-018-1999.yaml" /> 
+    <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu-018-1999.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/chubu2017.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/cut.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/dame.yaml" />  -->
@@ -490,15 +491,11 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/yama89.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/zigzag.yaml" />  -->
 
-
-    <!-- <rosparam command="load" file="$(find maze_solver)/config/output.yaml" />  -->
-
-
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2010hef.yaml" />  -->
-    <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2011hef.yaml" />  -->
+    <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2011hef.yaml" /> -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2012hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2013hef.yaml" />  -->
-    <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2014hef.yaml" />  -->
+    <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2014hef.yaml" /> -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2015hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2016hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2017hef.yaml" />  -->
@@ -512,12 +509,18 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2017hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2018hef.yaml" />  -->
 
+    <param name="maze_data/known" value="1" />
+
     <node pkg="tf" type="static_transform_publisher" name="world_map" args="0 0 0.2 0 0 0 world map 10" />
-    <node pkg="tf" type="static_transform_publisher" name="world_base" args="0 0 0.2 0 0 0 world base 10" />
-    <node pkg="tf" type="static_transform_publisher" name="world_baselink" args="0 0 0.2 0 0 0 world base_link 10" />
+    <node pkg="tf" type="static_transform_publisher" name="world_base" args="0 0 0 0 0 0 map base 10" />
+    <node pkg="tf" type="static_transform_publisher" name="world_baselink" args="0 0 0 0 0 0 map base_link 10" />
+
+    <node pkg="tf" type="static_transform_publisher" name="ego_egotrj" args="0 0 0 -1.57 0 0 ego ego_trajectory 100" />
+    <!-- <node pkg="tf" type="static_transform_publisher" name="map_ego" args="0.09 0.09 0.0 0 0 0 map ego 10" /> -->
 
     <node pkg="viewer" name="viewer" type="viewer" />
     <node pkg="maze_solver" name="maze_solver" type="maze_solver" />
     <node pkg="maze_solver" name="path_creator" type="path_creator" />
+    <node pkg="maze_solver" name="trajectory_simulator" type="trajectory_simulator" />
 
 </launch>

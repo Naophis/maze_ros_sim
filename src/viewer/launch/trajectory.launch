@@ -1,0 +1,13 @@
+<launch>
+    <!-- <node pkg="rviz" name="rviz" type="rviz" args="-d $(find viewer)/rviz/viewer.rviz" required="true" /> -->
+
+    <node pkg="tf" type="static_transform_publisher" name="world_map" args="0 0 0.2 0 0 0 world map 10" />
+    <node pkg="tf" type="static_transform_publisher" name="world_base" args="0 0 0.2 0 0 0 world base 10" />
+    <node pkg="tf" type="static_transform_publisher" name="world_baselink" args="0 0 0.2 0 0 0 world base_link 10" />
+
+    <node pkg="tf" type="static_transform_publisher" name="map_ego" args="0.2 0 0.0 0 0 0 map ego 10" />
+
+    <!-- <node pkg="viewer" name="viewer" type="viewer" /> -->
+    <node pkg="maze_solver" name="trajectory_simulator" type="trajectory_simulator" />
+
+</launch>

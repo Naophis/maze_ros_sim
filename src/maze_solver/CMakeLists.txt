@@ -24,6 +24,7 @@ add_executable(maze_solver
   src/controller.cpp
   src/logic.cpp
   src/adachi.cpp
+  src/trajectory/base_path.cpp
 )
 add_dependencies(maze_solver ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(maze_solver ${catkin_LIBRARIES})
@@ -35,4 +36,12 @@ add_executable(path_creator
 )
 add_dependencies(path_creator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(path_creator ${catkin_LIBRARIES})
+
+add_executable(trajectory_simulator
+  src/trajectory/trajectory_simulator.cpp
+  src/trajectory/trajectory_creator.cpp
+  src/trajectory/base_path.cpp
+)
+add_dependencies(trajectory_simulator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(trajectory_simulator ${catkin_LIBRARIES})
 

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot name="mechanum_robot">
+    <link name="ego">
+        <visual>
+            <geometry>
+                <mesh filename="package://viewer/meshes/exia.dae" />
+            </geometry>
+            <origin xyz="0.0235 0.0 0.0" rpy="0 0 -1.57" />
+        </visual>
+    </link>
+</robot>

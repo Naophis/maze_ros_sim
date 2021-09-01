@@ -7,6 +7,8 @@
 #include "adachi.hpp"
 #include "logic.hpp"
 #include "maze_solver.hpp"
+#include "my_msg/base_path.h"
+#include "my_msg/base_path_element.h"
 #include "my_msg/maze.h"
 
 using namespace std;
@@ -23,13 +25,16 @@ public:
   void update_step_map();
 
   void update_sensing_result();
+  void update_sensing_result2();
 
-  bool existWall_from_premap(int x, int y, int dir);
+  bool existWall_from_premap(int x, int y, Direction dir);
 
 private:
   ros::Timer timer;
   ros::NodeHandle _nh;
   ros::Publisher pub_maze_data;
+  ros::Publisher pub_base_path;
+  bool maze_known = false;
 
   unsigned char map[MAX_MAZE_SIZE][MAX_MAZE_SIZE];
   unsigned char pre_map_data[MAX_MAZE_SIZE][MAX_MAZE_SIZE];

@@ -9,6 +9,10 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/static_transform_broadcaster.h>
+#include <tf2_ros/transform_broadcaster.h>
+
 using namespace std;
 using namespace visualization_msgs;
 using namespace interactive_markers;
@@ -30,7 +34,7 @@ public:
   void timer_callback(const ros::TimerEvent &e);
   void init();
   void set_node_handler(const ros::NodeHandle &nh) { _nh = nh; }
-  void craete_wall(const ros::TimerEvent &e);
+  void craete_wall();
   void add_wall(int x, int y, int &idx, int dir);
   void add_poll(int x, int y, int &idx, int dir);
   void add_maze_base(int idx);
@@ -50,6 +54,7 @@ public:
   void set_data();
 
   void create_ego_marker();
+  void create_ego_marker2();
 
 private:
   ros::Timer timer;
@@ -58,6 +63,7 @@ private:
   MarkerArrayPtr maze_info_list[MAX_LOOP];
   MarkerArrayPtr maze_diainfo_list[MAX_LOOP];
   MarkerArrayPtr ego_marker_list[MAX_LOOP];
+  tf2_ros::TransformBroadcaster dynamic_br_;
 
   MarkerPtr path_array_list[MAX_LOOP];
   ros::Publisher pub_wall_list[4];
