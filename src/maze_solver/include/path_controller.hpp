@@ -23,11 +23,12 @@ private:
   point_t tmp_goal_p;
 
   ros::Publisher pub_path;
+  ros::Publisher pub_path_dia;
   ros::Subscriber sub_maze;
 
   PathCreator pc;
   int maze_size;
-
+  int max_step_val;
   void set_meta_data();
   void maze_callback(const my_msg::mazeConstPtr &_mz);
 

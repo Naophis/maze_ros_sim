@@ -51,20 +51,20 @@ bool Adachi::is_goal(int x, int y) {
   return false;
 }
 
-void Adachi::deadEnd() {
+void Adachi::deadEnd(int egox, int egoy) {
   bool head = true;
   while (head) {
     head = false;
     for (char i = -1; i <= 1; i++) {
       for (char j = -1; j <= 1; j++) {
-        const unsigned char x = ego->x + i;
-        const unsigned char y = ego->y + j;
+        const unsigned char x = egox + i;
+        const unsigned char y = egoy + j;
         const unsigned char temp = lgc->get_map_val(x, y) & 0x0f;
         if (x == 0 && y == 0)
           continue;
         if (is_goal(x, y))
           continue;
-        if (ego->x == x && ego->y == y)
+        if (egox == x && egoy == y)
           continue;
 
         if (temp == 0x07) {
@@ -221,7 +221,7 @@ int Adachi::exec(path_type &path) {
   }
   subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
   lgc->update_dist_map(0, goaled); // search
-  deadEnd();
+  deadEnd(ego->x, ego->y);
   if (goaled) {
     if (!goal_startpos_lock) {
       if (lgc->is_stepped(next_goal_pt.x, next_goal_pt.y) ||

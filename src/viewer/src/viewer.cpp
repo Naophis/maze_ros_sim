@@ -63,7 +63,7 @@ void Viewer::timer_callback(const ros::TimerEvent &e) {
       double straight = ph.path_s[i] * 0.5 - 1;
       int turn = ph.path_t[i];
       if (i == 0)
-        straight = (ph.path_s[i]) * 0.5 - 0.5;
+        straight = (ph.path_s[i] - 2) * 0.5 - 0.5;
       straight = straight >= 0 ? straight : 0;
 
       if (straight > 0) {
@@ -307,12 +307,20 @@ void Viewer::create_maze_info2(double x, double y, int &id, int dir) {
   mk.color.b = 0.5;
   mk.color.a = 1;
 
-  if ((map[xx][yy] & 0xf0) == 0xf0) {
-    mk.color.r = 0;
-    mk.color.g = 1;
-    mk.color.b = 1;
-    mk.color.a = 1;
-  }
+  if (dir == 1)
+    if ((map[xx][yy] & 0x10) == 0x10) {
+      mk.color.r = 0;
+      mk.color.g = 1;
+      mk.color.b = 1;
+      mk.color.a = 1;
+    }
+  if (dir == 2)
+    if ((map[xx][yy] & 0x20) == 0x20) {
+      mk.color.r = 0;
+      mk.color.g = 1;
+      mk.color.b = 1;
+      mk.color.a = 1;
+    }
   mk.pose.position.x = (x1 + x2) / 1000;
   mk.pose.position.y = (y1 + y2) / 1000;
   mk.pose.position.z = 0.07;

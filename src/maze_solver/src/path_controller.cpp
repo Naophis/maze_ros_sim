@@ -5,7 +5,9 @@ PathController::PathController(/* args */) {}
 PathController::~PathController() {}
 
 void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
-  int idx = 0;
+  pc.lgc = new MazeSolverBaseLgc();
+  pc.lgc->init(maze_size, max_step_val);
+  pc.lgc->set_goal_pos(goal_list);
   for (int i = 0; i < maze_size; i++) {
     for (int j = 0; j < maze_size; j++) {
       pc.lgc->set_map_val(j + i * maze_size, mz->wall[i + j * maze_size]);
@@ -33,6 +35,19 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
     path.path_t.push_back(p);
   }
   pub_path.publish(path);
+
+  pc.convert_large_path(true);
+  pc.diagonalPath(false, true);
+
+  my_msg::path path2;
+  int size = pc.path_s.size();
+  for (int i = 0; i < size; i++) {
+    path2.path_s.push_back(pc.path_s[i]);
+    path2.path_t.push_back(pc.path_t[i]);
+    if (pc.path_t[i] == 255)
+      break;
+  }
+  pub_path_dia.publish(path2);
 }
 
 void PathController::set_meta_data() {
@@ -45,7 +60,7 @@ void PathController::set_meta_data() {
     return;
   }
   maze_size = static_cast<int>(prm["maze_size"]);
-  int max_step_val = static_cast<int>(prm["max_step_val"]);
+  max_step_val = static_cast<int>(prm["max_step_val"]);
 
   goal_list.clear();
   int goal_size = prm["goal"].size();
@@ -64,6 +79,7 @@ void PathController::init() {
   set_meta_data();
   sub_maze = _nh.subscribe("/maze", 10, &PathController::maze_callback, this);
   pub_path = _nh.advertise<my_msg::path>("/path_info", 1);
+  pub_path_dia = _nh.advertise<my_msg::path>("/path_info_dia", 1);
 }
 
 int main(int argc, char **argv) {

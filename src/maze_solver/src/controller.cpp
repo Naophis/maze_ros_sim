@@ -45,6 +45,9 @@ void MazeSolverCtrl::update_sensing_result2() {
       lgc.set_wall_data(x, y - 1, Direction::North, south_wall);
     }
   }
+  for (int x = 0; x < maze_size; x++)
+    for (int y = 0; y < maze_size; y++)
+      adachi.deadEnd(x, y);
 }
 
 bool MazeSolverCtrl::existWall_from_premap(int x, int y, Direction dir) {
@@ -60,7 +63,8 @@ void MazeSolverCtrl::timer_callback(const ros::TimerEvent &e) {
   global_cnt++;
 
   update_sensing_result();
-
+  // mz.dia_dist_n.clear();
+  // mz.dia_dist_e.clear();
   mz.dia_dist_n.resize(maze_size * maze_size);
   mz.dia_dist_e.resize(maze_size * maze_size);
 
@@ -111,6 +115,8 @@ void MazeSolverCtrl::timer_callback(const ros::TimerEvent &e) {
       mz.dist.push_back(lgc.get_dist_val(i, j));
       mz.dia_dist_n[i + j * maze_size] = lgc.get_diadist_n_val(i, j);
       mz.dia_dist_e[i + j * maze_size] = lgc.get_diadist_e_val(i, j);
+      // mz.dia_dist_n.push_back(lgc.get_diadist_n_val(i, j));
+      // mz.dia_dist_e.push_back(lgc.get_diadist_e_val(i, j));
     }
   }
 
@@ -134,7 +140,7 @@ void MazeSolverCtrl::init() {
   update_sensing_result();
   ego.y++;
 
-  timer = _nh.createTimer(ros::Duration(0.2), &MazeSolverCtrl::timer_callback,
+  timer = _nh.createTimer(ros::Duration(0.1), &MazeSolverCtrl::timer_callback,
                           this);
   pub_maze_data = _nh.advertise<my_msg::maze>("/maze", 1);
   pub_base_path = _nh.advertise<my_msg::base_path>("/base_path", 1);

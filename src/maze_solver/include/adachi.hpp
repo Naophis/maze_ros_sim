@@ -41,7 +41,7 @@ public:
   vector<point_t> pt_list;
   vector<point_t> start_pt_list;
   bool is_go_home();
-  void deadEnd();
+  void deadEnd(int egox, int egoy);
   bool is_goal(int x, int y);
   bool is_goaled();
   MazeSolverBaseLgc *lgc;

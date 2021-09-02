@@ -11,6 +11,8 @@
 using namespace std;
 
 constexpr int checkQlength = 256;
+constexpr int R = 1;
+constexpr int L = 2;
 class PathCreator {
 private:
   int get_dist_val(int x, int y);
@@ -40,15 +42,21 @@ private:
 
   int checkQ[checkQlength];
 
+  void pathOffset();
+
 public:
   MazeSolverBaseLgc *lgc;
 
   vector<float> path_s;
   vector<int> path_t;
+  int path_size;
+
   PathCreator(/* args */);
   ~PathCreator();
   void path_create(bool is_search);
   void path_reflash();
+  void convert_large_path(bool b1);
+  void diagonalPath(bool isFull, bool a1);
 };
 
 #endif
