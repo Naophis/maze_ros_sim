@@ -71,7 +71,7 @@ void Viewer::timer_callback(const ros::TimerEvent &e) {
         p.x = x / 1000;
         p.y = y / 1000;
         p.z = z;
-        line_list.points.push_back(p);
+        line_list.points.emplace_back(p);
         if (dir == 1) {
           y += straight * cell_size;
         } else if (dir == 2) {
@@ -84,14 +84,14 @@ void Viewer::timer_callback(const ros::TimerEvent &e) {
         p.x = x / 1000;
         p.y = y / 1000;
         p.z = z;
-        line_list.points.push_back(p);
+        line_list.points.emplace_back(p);
       }
       if (turn != 255) {
         geometry_msgs::Point p;
         p.x = x / 1000;
         p.y = y / 1000;
         p.z = z;
-        line_list.points.push_back(p);
+        line_list.points.emplace_back(p);
         if (dir == 1) {
           if (turn == 1) {
             x += cell_size / 2;
@@ -136,7 +136,7 @@ void Viewer::timer_callback(const ros::TimerEvent &e) {
         p.x = x / 1000;
         p.y = y / 1000;
         p.z = z;
-        line_list.points.push_back(p);
+        line_list.points.emplace_back(p);
       }
     }
     pub_path_marker.publish(line_list);
@@ -737,9 +737,9 @@ void Viewer::makeButtonMarker(const tf::Vector3 &position) {
 
   Marker marker;
   make_base(marker);
-  control.markers.push_back(marker);
+  control.markers.emplace_back(marker);
   control.always_visible = true;
-  int_marker.controls.push_back(control);
+  int_marker.controls.emplace_back(control);
 
   im_server->insert(int_marker);
   im_server->setCallback(int_marker.name,

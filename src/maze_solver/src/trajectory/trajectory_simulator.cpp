@@ -7,7 +7,7 @@ void TrajectorySimulator::base_path_callback(
   for (const auto ph : bp->paths) {
     ele.s = ph.s;
     ele.t = ph.t;
-    base_path.paths.push_back(ele);
+    base_path.paths.emplace_back(ele);
   }
   base_path.size = bp->size;
   vector<trajectory_point_t> trajectory;
@@ -33,7 +33,7 @@ void TrajectorySimulator::base_path_callback(
     p.x = trj.x / 1000;
     p.y = trj.y / 1000;
     p.z = 0.01;
-    line_list.points.push_back(p);
+    line_list.points.emplace_back(p);
   }
   pub_trajectory.publish(line_list);
 }
@@ -48,22 +48,22 @@ void TrajectorySimulator::timer_callback(const ros::TimerEvent &e) {
   //   if (next_motion == Motion::Straight) {
   //     ele.s = 2;
   //     ele.t = static_cast<int>(PathMotion::End);
-  //     bp.paths.push_back(ele);
+  //     bp.paths.emplace_back(ele);
   //   } else if (next_motion == Motion::TurnRight) {
   //     ele.s = 0;
   //     ele.t = static_cast<int>(PathMotion::Right);
-  //     bp.paths.push_back(ele);
+  //     bp.paths.emplace_back(ele);
   //   } else if (next_motion == Motion::TurnLeft) {
   //     ele.s = 0;
   //     ele.t = static_cast<int>(PathMotion::Left);
-  //     bp.paths.push_back(ele);
+  //     bp.paths.emplace_back(ele);
   //   } else if (next_motion == Motion::Back) {
   //     ele.s = 1;
   //     ele.t = static_cast<int>(PathMotion::Pivot180);
-  //     bp.paths.push_back(ele);
+  //     bp.paths.emplace_back(ele);
   //     ele.s = 1;
   //     ele.t = static_cast<int>(PathMotion::End);
-  //     bp.paths.push_back(ele);
+  //     bp.paths.emplace_back(ele);
   //   }
   //   bp.size = bp.paths.size();
   // }

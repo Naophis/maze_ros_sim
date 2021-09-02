@@ -29,10 +29,10 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
   pc.path_create(mz->motion != 0);
   my_msg::path path;
   for (const auto p : pc.path_s) {
-    path.path_s.push_back(p);
+    path.path_s.emplace_back(p);
   }
   for (const auto p : pc.path_t) {
-    path.path_t.push_back(p);
+    path.path_t.emplace_back(p);
   }
   pub_path.publish(path);
 
@@ -42,8 +42,8 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
   my_msg::path path2;
   int size = pc.path_s.size();
   for (int i = 0; i < size; i++) {
-    path2.path_s.push_back(pc.path_s[i]);
-    path2.path_t.push_back(pc.path_t[i]);
+    path2.path_s.emplace_back(pc.path_s[i]);
+    path2.path_t.emplace_back(pc.path_t[i]);
     if (pc.path_t[i] == 255)
       break;
   }
@@ -67,7 +67,7 @@ void PathController::set_meta_data() {
   for (int i = 0; i < goal_size; i++) {
     tmp_goal_p.x = static_cast<int>(prm["goal"][i][0]);
     tmp_goal_p.y = static_cast<int>(prm["goal"][i][1]);
-    goal_list.push_back(tmp_goal_p);
+    goal_list.emplace_back(tmp_goal_p);
   }
 
   // 迷路情報格納モジュール初期化

@@ -266,7 +266,7 @@ int Adachi::exec(path_type &path) {
           pt_list.clear();
           point_t tmp_p;
           tmp_p.x = tmp_p.y = 0;
-          pt_list.push_back(tmp_p);
+          pt_list.emplace_back(tmp_p);
         } else {
           pt_list.clear();
           point_t tmp_p;
@@ -274,7 +274,7 @@ int Adachi::exec(path_type &path) {
                ++itr) {
             tmp_p.x = itr->first % lgc->maze_size;
             tmp_p.y = itr->first / lgc->maze_size;
-            pt_list.push_back(tmp_p);
+            pt_list.emplace_back(tmp_p);
           }
         }
 

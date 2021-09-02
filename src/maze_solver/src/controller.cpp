@@ -86,22 +86,22 @@ void MazeSolverCtrl::timer_callback(const ros::TimerEvent &e) {
     if (next_motion == Motion::Straight) {
       ele.s = 2;
       ele.t = static_cast<int>(PathMotion::End);
-      bp.paths.push_back(ele);
+      bp.paths.emplace_back(ele);
     } else if (next_motion == Motion::TurnRight) {
       ele.s = 0;
       ele.t = static_cast<int>(PathMotion::Right);
-      bp.paths.push_back(ele);
+      bp.paths.emplace_back(ele);
     } else if (next_motion == Motion::TurnLeft) {
       ele.s = 0;
       ele.t = static_cast<int>(PathMotion::Left);
-      bp.paths.push_back(ele);
+      bp.paths.emplace_back(ele);
     } else if (next_motion == Motion::Back) {
       ele.s = 1;
       ele.t = static_cast<int>(PathMotion::Pivot180);
-      bp.paths.push_back(ele);
+      bp.paths.emplace_back(ele);
       ele.s = 1;
       ele.t = static_cast<int>(PathMotion::End);
-      bp.paths.push_back(ele);
+      bp.paths.emplace_back(ele);
     }
     bp.size = bp.paths.size();
     pub_base_path.publish(bp);
@@ -111,12 +111,12 @@ void MazeSolverCtrl::timer_callback(const ros::TimerEvent &e) {
 
   for (int i = 0; i < maze_size; i++) {
     for (int j = 0; j < maze_size; j++) {
-      mz.wall.push_back(lgc.get_map_val(i, j));
-      mz.dist.push_back(lgc.get_dist_val(i, j));
+      mz.wall.emplace_back(lgc.get_map_val(i, j));
+      mz.dist.emplace_back(lgc.get_dist_val(i, j));
       mz.dia_dist_n[i + j * maze_size] = lgc.get_diadist_n_val(i, j);
       mz.dia_dist_e[i + j * maze_size] = lgc.get_diadist_e_val(i, j);
-      // mz.dia_dist_n.push_back(lgc.get_diadist_n_val(i, j));
-      // mz.dia_dist_e.push_back(lgc.get_diadist_e_val(i, j));
+      // mz.dia_dist_n.emplace_back(lgc.get_diadist_n_val(i, j));
+      // mz.dia_dist_e.emplace_back(lgc.get_diadist_e_val(i, j));
     }
   }
 
@@ -165,7 +165,7 @@ void MazeSolverCtrl::set_meta_maze_data() {
   for (int i = 0; i < goal_size; i++) {
     tmp_goal_p.x = static_cast<int>(prm["goal"][i][0]);
     tmp_goal_p.y = static_cast<int>(prm["goal"][i][1]);
-    goal_list.push_back(tmp_goal_p);
+    goal_list.emplace_back(tmp_goal_p);
   }
   int c = 0;
 

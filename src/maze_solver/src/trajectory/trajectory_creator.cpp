@@ -19,7 +19,7 @@ void TrajectoryCreator::exec(path_struct &base_path,
         trj_ele.y = trj_ele.y + v_max * dt;
         trj_ele.ang = 0;
         tmp_dist += v_max * dt;
-        trajectory.push_back(trj_ele);
+        trajectory.emplace_back(trj_ele);
       }
       break;
     } else if (turn == static_cast<int>(PathMotion::Right)) {
@@ -36,7 +36,7 @@ void TrajectoryCreator::exec(path_struct &base_path,
         trj_ele.ang += w * dt;
         trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
         trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
-        trajectory.push_back(trj_ele);
+        trajectory.emplace_back(trj_ele);
       }
     } else if (turn == static_cast<int>(PathMotion::Left)) {
       float tgt_ang = 3.14 / 2;
@@ -52,7 +52,7 @@ void TrajectoryCreator::exec(path_struct &base_path,
         trj_ele.ang += w * dt;
         trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
         trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
-        trajectory.push_back(trj_ele);
+        trajectory.emplace_back(trj_ele);
       }
     }
 

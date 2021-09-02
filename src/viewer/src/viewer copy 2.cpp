@@ -32,8 +32,8 @@ Marker makeBox(InteractiveMarker &msg) {
 InteractiveMarkerControl &makeBoxControl(InteractiveMarker &msg) {
   InteractiveMarkerControl control;
   control.always_visible = true;
-  control.markers.push_back(makeBox(msg));
-  msg.controls.push_back(control);
+  control.markers.emplace_back(makeBox(msg));
+  msg.controls.emplace_back(control);
 
   return msg.controls.back();
 }
@@ -106,9 +106,9 @@ void makeButtonMarker(const tf::Vector3 &position) {
   control.name = "button_control";
 
   Marker marker = makeBox(int_marker);
-  control.markers.push_back(marker);
+  control.markers.emplace_back(marker);
   control.always_visible = true;
-  int_marker.controls.push_back(control);
+  int_marker.controls.emplace_back(control);
 
   server->insert(int_marker);
   server->setCallback(int_marker.name, &processFeedback);

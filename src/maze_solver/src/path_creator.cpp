@@ -19,10 +19,10 @@ void PathCreator::path_reflash() {
 }
 
 void PathCreator::append_path_s(float val) {
-  path_s.push_back(val); //
+  path_s.emplace_back(val); //
 }
 void PathCreator::append_path_t(int val) {
-  path_t.push_back(val); //
+  path_t.emplace_back(val); //
 }
 void PathCreator::add_path_s(int idx, float val) {
   path_s[idx] += val; //
@@ -171,7 +171,7 @@ void PathCreator::path_create(bool is_search) {
   clearCheckMap();
   lgc->updateVectorMap(is_search);
 
-  path_s.push_back(3);
+  path_s.emplace_back(3);
   float dist_val;
   while (true) {
     now_dir = next_dir;
@@ -184,8 +184,8 @@ void PathCreator::path_create(bool is_search) {
 
     if (lgc->arrival_goal_position(x, y)) {
       add_path_s(idx, 3);
-      path_t.push_back(255);
-      // path_t.push_back(0);
+      path_t.emplace_back(255);
+      // path_t.emplace_back(0);
       path_size = idx;
       return;
     }
@@ -209,15 +209,15 @@ void PathCreator::path_create(bool is_search) {
     if (nextMotion == Motion::Straight) {
       add_path_s(idx, 2);
     } else if (nextMotion == Motion::TurnRight) {
-      path_t.push_back(static_cast<int>(TurnDirection::Right));
-      path_s.push_back(2);
+      path_t.emplace_back(static_cast<int>(TurnDirection::Right));
+      path_s.emplace_back(2);
       idx++;
     } else if (nextMotion == Motion::TurnLeft) {
-      path_t.push_back(static_cast<int>(TurnDirection::Left));
-      path_s.push_back(2);
+      path_t.emplace_back(static_cast<int>(TurnDirection::Left));
+      path_s.emplace_back(2);
       idx++;
     } else {
-      path_t.push_back(0);
+      path_t.emplace_back(0);
       break;
     }
     next_dir = get_next_pos(x, y, now_dir, next_dir);

@@ -18,28 +18,28 @@ void MazeSolverBaseLgc::init(const int _maze_size, const int _max_step_val) {
   // point_t p;
   // p.x = maze_size - 1;
   // p.y = 0;
-  // goal_list3.push_back(p);
+  // goal_list3.emplace_back(p);
   // p.x = maze_size - 1;
   // p.y = maze_size - 1;
-  // goal_list3.push_back(p);
+  // goal_list3.emplace_back(p);
   // p.x = 0;
   // p.y = maze_size - 1;
-  // goal_list3.push_back(p);
+  // goal_list3.emplace_back(p);
   // p.x = 0;
   // p.y = maze_size - 1;
-  // goal_list3.push_back(p);
+  // goal_list3.emplace_back(p);
 }
 
 void MazeSolverBaseLgc::set_goal_pos(const vector<point_t> &list) {
   goal_list.clear();
   for (const auto p : list)
-    goal_list.push_back(p);
+    goal_list.emplace_back(p);
 }
 
 void MazeSolverBaseLgc::set_goal_pos2(const vector<point_t> &pt_list) {
   goal_list2.clear();
   for (const auto p : pt_list)
-    goal_list2.push_back(p);
+    goal_list2.emplace_back(p);
 }
 
 bool MazeSolverBaseLgc::valid_map_list_idx(const int x, const int y) {
@@ -257,7 +257,7 @@ void MazeSolverBaseLgc::back_home() {
   clear_goal();
   point_t p;
   p.x = p.y = 0;
-  goal_list.push_back(p);
+  goal_list.emplace_back(p);
 }
 
 void MazeSolverBaseLgc::clear_goal() { goal_list.clear(); }
@@ -265,7 +265,7 @@ void MazeSolverBaseLgc::clear_goal() { goal_list.clear(); }
 void MazeSolverBaseLgc::append_goal(const int x, const int y) {
   point_t p;
   p.x = p.y = 0;
-  goal_list.push_back(p);
+  goal_list.emplace_back(p);
 }
 
 int MazeSolverBaseLgc::get_max_step_val() { return max_step_val; }
@@ -917,7 +917,7 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(const bool isSearch,
     next_dir = Direction::Undefined;
     pt.x = x;
     pt.y = y;
-    search_log.push_back(pt);
+    search_log.emplace_back(pt);
 
     if (arrival_goal_position(x, y))
       break;
@@ -937,25 +937,25 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(const bool isSearch,
       if (is_unknown(x, y, Direction::North)) {
         pt.x = x;
         pt.y = y + 1;
-        pt_list.push_back(pt);
+        pt_list.emplace_back(pt);
       }
     } else if (next_dir == Direction::East) {
       if (is_unknown(x, y, Direction::East)) {
         pt.x = x + 1;
         pt.y = y;
-        pt_list.push_back(pt);
+        pt_list.emplace_back(pt);
       }
     } else if (next_dir == Direction::West) {
       if (is_unknown(x, y, Direction::West)) {
         pt.x = x - 1;
         pt.y = y;
-        pt_list.push_back(pt);
+        pt_list.emplace_back(pt);
       }
     } else if (next_dir == Direction::South) {
       if (is_unknown(x, y, Direction::South)) {
         pt.x = x;
         pt.y = y - 1;
-        pt_list.push_back(pt);
+        pt_list.emplace_back(pt);
       }
     }
 
@@ -998,7 +998,7 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
     next_dir = Direction::Undefined;
     pt.x = x;
     pt.y = y;
-    search_log.push_back(pt);
+    search_log.emplace_back(pt);
 
     if (arrival_goal_position(x, y))
       break;
@@ -1104,7 +1104,7 @@ void MazeSolverBaseLgc::searchGoalPosition2(const bool isSearch,
           if (is_unknown(X + i, Y + j, D)) {
             pt.x = X + i;
             pt.y = Y + j;
-            pt_list.push_back(pt);
+            pt_list.emplace_back(pt);
           }
         }
       }
