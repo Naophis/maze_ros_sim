@@ -102,4 +102,11 @@ typedef struct {
 
 constexpr initializer_list<Direction> direction_list = {
     Direction::North, Direction::East, Direction::West, Direction::South};
+
+typedef struct {
+  float x;
+  float y;
+  float ang;
+  Direction dir;
+} ego_odom_t;
 #endif

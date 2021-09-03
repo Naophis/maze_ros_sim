@@ -4,6 +4,8 @@
 #include <ros/ros.h>
 
 #include "maze_solver.hpp"
+#include "my_msg/base_path.h"
+#include "my_msg/base_path_element.h"
 #include "my_msg/maze.h"
 #include "my_msg/path.h"
 
@@ -24,6 +26,7 @@ private:
 
   ros::Publisher pub_path;
   ros::Publisher pub_path_dia;
+  ros::Publisher pub_base_path_dia;
   ros::Subscriber sub_maze;
 
   PathCreator pc;

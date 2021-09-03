@@ -36,8 +36,8 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
   }
   pub_path.publish(path);
 
-  pc.convert_large_path(true);
-  pc.diagonalPath(false, true);
+  // pc.convert_large_path(true);
+  // pc.diagonalPath(false, true);
 
   my_msg::path path2;
   int size = pc.path_s.size();
@@ -48,6 +48,20 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
       break;
   }
   pub_path_dia.publish(path2);
+
+  my_msg::base_path bp;
+  my_msg::base_path_element ele;
+  bp.paths.clear();
+  bp.size = 0;
+  for (int i = 0; i < size; i++) {
+    ele.s = pc.path_s[i];
+    ele.t = pc.path_t[i];
+    bp.paths.emplace_back(ele);
+    bp.size = i + 1;
+    if (pc.path_t[i] == 255)
+      break;
+  }
+  pub_base_path_dia.publish(bp);
 }
 
 void PathController::set_meta_data() {
@@ -80,6 +94,7 @@ void PathController::init() {
   sub_maze = _nh.subscribe("/maze", 10, &PathController::maze_callback, this);
   pub_path = _nh.advertise<my_msg::path>("/path_info", 1);
   pub_path_dia = _nh.advertise<my_msg::path>("/path_info_dia", 1);
+  pub_base_path_dia = _nh.advertise<my_msg::base_path>("/base_path_dia", 1);
 }
 
 int main(int argc, char **argv) {

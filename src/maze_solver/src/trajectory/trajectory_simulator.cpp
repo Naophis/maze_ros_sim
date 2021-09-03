@@ -1,5 +1,44 @@
 #include "trajectory_simulator.hpp"
 
+void TrajectorySimulator::base_path_dia_callback(
+    const my_msg::base_pathConstPtr &bp) {
+  //
+  path_struct base_path;
+  path_element ele;
+  for (const auto ph : bp->paths) {
+    ele.s = ph.s;
+    ele.t = ph.t;
+    base_path.paths.emplace_back(ele);
+  }
+  base_path.size = bp->size;
+  vector<trajectory_point_t> trajectory;
+  tc.exec2(base_path, trajectory);
+
+  // ROS_WARN("%ld", trajectory.size());
+  visualization_msgs::Marker line_list;
+  line_list.header.frame_id = "maze_base";
+  line_list.header.stamp = ros::Time::now();
+  line_list.ns = "points_and_lines";
+  line_list.action = visualization_msgs::Marker::ADD;
+  line_list.pose.orientation.w = 0.000;
+  line_list.id = 2;
+  line_list.type = visualization_msgs::Marker::POINTS;
+  line_list.scale.x = 0.005;
+  line_list.scale.y = 0.005;
+  line_list.scale.z = 0.005;
+  line_list.color.r = 1;
+  line_list.color.g = 1;
+  line_list.color.b = 0.5;
+  line_list.color.a = 1;
+  for (const auto trj : trajectory) {
+    geometry_msgs::Point p;
+    p.x = trj.x / 1000;
+    p.y = trj.y / 1000;
+    p.z = 0.01;
+    line_list.points.emplace_back(p);
+  }
+  pub_trajectory_dia.publish(line_list);
+}
 void TrajectorySimulator::base_path_callback(
     const my_msg::base_pathConstPtr &bp) {
   path_struct base_path;
@@ -77,10 +116,13 @@ void TrajectorySimulator::init() {
 
   sub_base_path = _nh.subscribe("/base_path", 10,
                                 &TrajectorySimulator::base_path_callback, this);
+
+  sub_base_path_dia = _nh.subscribe(
+      "/base_path_dia", 10, &TrajectorySimulator::base_path_dia_callback, this);
   // pub_base_path = _nh.advertise<my_msg::base_path>("/base_path", 1);
 
-  mk_trajectory.reset(new Marker);
   pub_trajectory = _nh.advertise<Marker>("/viewer/base_path", 1);
+  pub_trajectory_dia = _nh.advertise<Marker>("/viewer/base_path_dia", 1);
 }
 
 int main(int argc, char **argv) {

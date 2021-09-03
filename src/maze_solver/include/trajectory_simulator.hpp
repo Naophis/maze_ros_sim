@@ -21,7 +21,9 @@ private:
   ros::NodeHandle _nh;
   ros::Publisher pub_base_path;
   ros::Publisher pub_trajectory;
+  ros::Publisher pub_trajectory_dia;
   ros::Subscriber sub_base_path;
+  ros::Subscriber sub_base_path_dia;
 
   MarkerPtr mk_trajectory;
   TrajectoryCreator tc;
@@ -33,6 +35,7 @@ public:
   void set_node_handler(const ros::NodeHandle &nh) { _nh = nh; }
   void timer_callback(const ros::TimerEvent &e);
   void base_path_callback(const my_msg::base_pathConstPtr &bp);
+  void base_path_dia_callback(const my_msg::base_pathConstPtr &bp);
   void exec();
 };
 

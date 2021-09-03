@@ -15,6 +15,7 @@ public:
   TrajectoryCreator(/* args */);
   ~TrajectoryCreator();
   void exec(path_struct &base_path, vector<trajectory_point_t> &trajectory);
+  void exec2(path_struct &base_path, vector<trajectory_point_t> &trajectory);
 };
 
 #endif

@@ -514,6 +514,7 @@
 
     <node pkg="tf" type="static_transform_publisher" name="world_map" args="0 0 0.2 0 0 0 world map 10" />
     <node pkg="tf" type="static_transform_publisher" name="world_base" args="0 0 0 0 0 0 map base 10" />
+    <node pkg="tf" type="static_transform_publisher" name="maze_base" args="0.09 0.09 0 0 0 0 base maze_base 10" />
     <node pkg="tf" type="static_transform_publisher" name="world_baselink" args="0 0 0 0 0 0 map base_link 10" />
 
     <node pkg="tf" type="static_transform_publisher" name="ego_egotrj" args="0 0 0 -1.57 0 0 ego ego_trajectory 100" />
