@@ -139,7 +139,7 @@ public:
   }
 
   void set_param3() {
-    cell_size = 90;
+    cell_size = 7;
     Dia = cell_size * 1.41421356 / 2;
     Dia2 = cell_size * 1.41421356 / 2 * 3 / 5;
     Dia3 = cell_size * 1.41421356 / 2 * 2 / 5;
@@ -171,6 +171,8 @@ public:
     St2 = cell_size / (tmp2 + 1);
     St3 = cell_size / (tmp2 + 3);
   }
+  void priorityStraight2(int x, int y, Direction now_dir, Direction dir,
+                         float &dist_val, Direction &next_dir);
 
 private:
   vector<unsigned char> map;

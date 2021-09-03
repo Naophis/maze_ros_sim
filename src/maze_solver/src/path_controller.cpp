@@ -36,8 +36,8 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
   }
   pub_path.publish(path);
 
-  // pc.convert_large_path(true);
-  // pc.diagonalPath(false, true);
+  pc.convert_large_path(true);
+  pc.diagonalPath(false, true);
 
   my_msg::path path2;
   int size = pc.path_s.size();

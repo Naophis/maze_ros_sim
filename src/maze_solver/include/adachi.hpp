@@ -18,6 +18,8 @@ private:
   //                       int &val);
   void setNextDirection(int x2, int y2, Direction dir, Direction &next_dir,
                         int &val);
+  void setNextDirection2(int x2, int y2, Direction dir, Direction &next_dir,
+                         int &val);
   bool goaled = false;
   bool goal_startpos_lock = false;
   point_t next_goal_pt = {0};

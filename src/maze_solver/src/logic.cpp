@@ -234,13 +234,13 @@ void MazeSolverBaseLgc::set_wall_data(const int x, const int y, Direction dir,
 }
 
 void MazeSolverBaseLgc::set_default_wall_data() {
-  for (int i = 0; i < maze_size; i++) {
-    // set_map
-    set_wall_data(i, maze_size - 1, Direction::North, true);
-    set_wall_data(maze_size - 1, i, Direction::East, true);
-    set_wall_data(0, i, Direction::West, true);
-    set_wall_data(i, 0, Direction::South, true);
-  }
+  // for (int i = 0; i < maze_size; i++) {
+  //   // set_map
+  //   set_wall_data(i, maze_size - 1, Direction::North, true);
+  //   set_wall_data(maze_size - 1, i, Direction::East, true);
+  //   set_wall_data(0, i, Direction::West, true);
+  //   set_wall_data(i, 0, Direction::South, true);
+  // }
   set_wall_data(0, 0, Direction::East, true);
   set_wall_data(0, 0, Direction::North, false);
   set_wall_data(1, 0, Direction::West, true);
@@ -279,15 +279,17 @@ int MazeSolverBaseLgc::clear_vector_distmap() {
       vector_dist[idx].e = vector_max_step_val;
       vector_dist[idx].w = vector_max_step_val;
       vector_dist[idx].s = vector_max_step_val;
-      vector_dist[idx].step = 0;
       vector_dist[idx].v = 0;
       vector_dist[idx].N1 = 0;
-      vector_dist[idx].E1 = 0;
-      vector_dist[idx].W1 = 0;
       vector_dist[idx].NE = 0;
-      vector_dist[idx].NW = 0;
+      vector_dist[idx].E1 = 0;
       vector_dist[idx].SE = 0;
+      vector_dist[idx].S1 = 0;
       vector_dist[idx].SW = 0;
+      vector_dist[idx].W1 = 0;
+      vector_dist[idx].NW = 0;
+      vector_dist[idx].W1 = 0;
+      vector_dist[idx].step = 0;
       updateMap[idx] = 0;
     }
   }
@@ -348,27 +350,37 @@ int MazeSolverBaseLgc::clear_vector_distmap(
   for (char i = 0; i < maze_size; i++) {
     for (char j = 0; j < maze_size; j++) {
       int idx = i + j * maze_size;
-      if (vector_dist[idx].n == vector_max_step_val)
+      if (vector_dist[idx].n == vector_max_step_val &&
+          vector_dist[idx].e == vector_max_step_val &&
+          vector_dist[idx].w == vector_max_step_val &&
+          vector_dist[idx].s == vector_max_step_val)
         subgoal_list.erase(idx);
       else if (subgoal_list.count(idx) > 0) {
         subgoal_list[idx]++;
-        if (subgoal_list[idx] > 45)
-          subgoal_list.erase(idx);
+        if (maze_size > 20) {
+          if (subgoal_list[idx] > 45)
+            subgoal_list.erase(idx);
+        } else {
+          if (subgoal_list[idx] > 25)
+            subgoal_list.erase(idx);
+        }
       }
-      
+
       vector_dist[idx].n = vector_max_step_val;
       vector_dist[idx].e = vector_max_step_val;
       vector_dist[idx].w = vector_max_step_val;
       vector_dist[idx].s = vector_max_step_val;
-      vector_dist[idx].step = 0;
       vector_dist[idx].v = 0;
       vector_dist[idx].N1 = 0;
-      vector_dist[idx].E1 = 0;
-      vector_dist[idx].W1 = 0;
       vector_dist[idx].NE = 0;
-      vector_dist[idx].NW = 0;
+      vector_dist[idx].E1 = 0;
       vector_dist[idx].SE = 0;
+      vector_dist[idx].S1 = 0;
       vector_dist[idx].SW = 0;
+      vector_dist[idx].W1 = 0;
+      vector_dist[idx].NW = 0;
+      vector_dist[idx].W1 = 0;
+      vector_dist[idx].step = 0;
       updateMap[idx] = 0;
     }
   }
@@ -605,7 +617,15 @@ int MazeSolverBaseLgc::getVector(const int x, const int y, Direction dir) {
 
 bool MazeSolverBaseLgc::is_unknown(const int x, const int y, Direction dir) {
   if (valid_map_list_idx(x, y)) {
-    return (map[x + y * maze_size] & (0x10 * static_cast<int>(dir))) == 0x00;
+    // return (map[x + y * maze_size] & 0xf0) != 0xf0;
+    if (dir == Direction::North)
+      return (map[x + y * maze_size] & 0x10) == 0x00;
+    else if (dir == Direction::East)
+      return (map[x + y * maze_size] & 0x20) == 0x00;
+    else if (dir == Direction::West)
+      return (map[x + y * maze_size] & 0x40) == 0x00;
+    else if (dir == Direction::South)
+      return (map[x + y * maze_size] & 0x80) == 0x00;
   }
   return false;
 }
@@ -878,7 +898,7 @@ void MazeSolverBaseLgc::setNextRootDirectionPathUnKnown(
     int x, int y, Direction dir, Direction now_dir, Direction &nextDirection,
     float &Value) {
   const bool isWall = existWall(x, y, dir);
-  const bool step = isStep(x, y, dir);
+  // const bool step = isStep(x, y, dir);
   const float dist = isWall ? vector_max_step_val : getDistVector(x, y, dir);
   if (static_cast<int>(now_dir) * static_cast<int>(dir) == 8)
     return;
@@ -895,105 +915,32 @@ bool MazeSolverBaseLgc::arrival_goal_position(const int x, const int y) {
   return false;
 }
 
-unsigned int MazeSolverBaseLgc::searchGoalPosition(const bool isSearch,
-                                                   vector<point_t> &pt_list) {
-
-  Direction next_dir = Direction::North;
-  Direction now_dir = Direction::North;
-  int x = 0;
-  int y = 0;
-  int position = 0;
-  int idx;
-  float Value;
-
-  point_t pt;
-  pt.x = 0;
-  pt.y = 0;
-  search_log.clear();
-  unsigned int cnt = updateVectorMap(isSearch);
-  while (true) {
-    now_dir = next_dir;
-    Value = VectorMax;
-    next_dir = Direction::Undefined;
-    pt.x = x;
-    pt.y = y;
-    search_log.emplace_back(pt);
-
-    if (arrival_goal_position(x, y))
-      break;
-
-    const unsigned int position = getDistVector(x, y, now_dir);
-
-    setNextRootDirectionPathUnKnown(x, y, Direction::North, now_dir, next_dir,
-                                    Value);
-    setNextRootDirectionPathUnKnown(x, y, Direction::East, now_dir, next_dir,
-                                    Value);
-    setNextRootDirectionPathUnKnown(x, y, Direction::West, now_dir, next_dir,
-                                    Value);
-    setNextRootDirectionPathUnKnown(x, y, Direction::South, now_dir, next_dir,
-                                    Value);
-
-    if (next_dir == Direction::North) {
-      if (is_unknown(x, y, Direction::North)) {
-        pt.x = x;
-        pt.y = y + 1;
-        pt_list.emplace_back(pt);
-      }
-    } else if (next_dir == Direction::East) {
-      if (is_unknown(x, y, Direction::East)) {
-        pt.x = x + 1;
-        pt.y = y;
-        pt_list.emplace_back(pt);
-      }
-    } else if (next_dir == Direction::West) {
-      if (is_unknown(x, y, Direction::West)) {
-        pt.x = x - 1;
-        pt.y = y;
-        pt_list.emplace_back(pt);
-      }
-    } else if (next_dir == Direction::South) {
-      if (is_unknown(x, y, Direction::South)) {
-        pt.x = x;
-        pt.y = y - 1;
-        pt_list.emplace_back(pt);
-      }
-    }
-
-    if (next_dir == Direction::North)
-      y++;
-    else if (next_dir == Direction::East)
-      x++;
-    else if (next_dir == Direction::West)
-      x--;
-    else if (next_dir == Direction::South)
-      y--;
-
-    if (next_dir == Direction::Undefined)
-      break;
-  }
-  // pt_list.erase(std::unique(pt_list.begin(), pt_list.end()), pt_list.end());
-
-  return cnt;
-}
-
 unsigned int MazeSolverBaseLgc::searchGoalPosition(
     const bool isSearch,
     unordered_map<unsigned int, unsigned char> &subgoal_list) {
   Direction next_dir = Direction::North;
   Direction now_dir = Direction::North;
   int x = 0;
-  int y = 0;
+  int y = 1;
   int position = 0;
   int idx;
   float Value;
 
+  Direction dirLog[3];
   point_t pt;
   pt.x = 0;
   pt.y = 0;
   search_log.clear();
+
+  dirLog[2] = dirLog[1] = dirLog[0] = now_dir;
+
   unsigned int cnt = updateVectorMap(isSearch, subgoal_list);
+
   while (true) {
     now_dir = next_dir;
+    dirLog[2] = dirLog[1];
+    dirLog[1] = dirLog[0];
+    dirLog[0] = now_dir;
     Value = VectorMax;
     next_dir = Direction::Undefined;
     pt.x = x;
@@ -1014,15 +961,20 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
     setNextRootDirectionPathUnKnown(x, y, Direction::South, now_dir, next_dir,
                                     Value);
 
+    if (dirLog[0] == dirLog[1] || dirLog[0] != dirLog[2])
+      priorityStraight2(x, y, now_dir, dirLog[0], Value, next_dir);
+    else
+      priorityStraight2(x, y, now_dir, dirLog[1], Value, next_dir);
+
     if (next_dir == Direction::North) {
       if (is_unknown(x, y, Direction::North))
         subgoal_list[x + (y + 1) * maze_size] = 1;
     } else if (next_dir == Direction::East) {
       if (is_unknown(x, y, Direction::East))
-        subgoal_list[x + 1 + (y)*maze_size] = 1;
+        subgoal_list[x + 1 + y * maze_size] = 1;
     } else if (next_dir == Direction::West) {
       if (is_unknown(x, y, Direction::West))
-        subgoal_list[x - 1 + (y)*maze_size] = 1;
+        subgoal_list[x - 1 + y * maze_size] = 1;
     } else if (next_dir == Direction::South) {
       if (is_unknown(x, y, Direction::South))
         subgoal_list[x + (y - 1) * maze_size] = 1;
@@ -1111,7 +1063,19 @@ void MazeSolverBaseLgc::searchGoalPosition2(const bool isSearch,
     }
   }
 }
-
+void MazeSolverBaseLgc::priorityStraight2(int x, int y, Direction now_dir,
+                                          Direction dir, float &dist_val,
+                                          Direction &next_dir) {
+  const bool isWall = existWall(x, y, dir);
+  const bool step = isStep(x, y, dir);
+  const float dist = isWall ? vector_max_step_val : getDistVector(x, y, dir);
+  if (static_cast<int>(now_dir) * static_cast<int>(dir) == 8)
+    return;
+  if (!isWall && step && dist <= dist_val) {
+    next_dir = dir;
+    dist_val = dist;
+  }
+}
 MazeSolverBaseLgc::MazeSolverBaseLgc(/* args */) {}
 
 MazeSolverBaseLgc::~MazeSolverBaseLgc() {}

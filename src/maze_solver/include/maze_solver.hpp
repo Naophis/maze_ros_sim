@@ -46,10 +46,11 @@ enum class Motion : int {
 };
 
 enum class TurnDirection : int {
+  None = 0,
   Right = 1,
   Left = 2,
   Pivot180 = 128,
-  End = 256
+  End = 256,
 };
 
 enum class PathMotion : int {
@@ -57,6 +58,18 @@ enum class PathMotion : int {
   Left = 2,
   Pivot180 = 128,
   End = 255,
+};
+
+enum class TurnType : int {
+  None = 0,
+  Normal = 1,
+  Orval = 2,
+  Large = 3,
+  Dia45 = 4,
+  Dia135 = 5,
+  Dia90 = 6,
+  Kojima = 7,
+  Finish = 255,
 };
 
 typedef struct {

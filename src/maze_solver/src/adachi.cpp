@@ -43,6 +43,41 @@ void Adachi::setNextDirection(int x2, int y2, Direction dir,
     }
   }
 }
+void Adachi::setNextDirection2(int x2, int y2, Direction dir,
+                               Direction &next_dir, int &val) {
+
+  bool isWall = lgc->existWall(ego->x, ego->y, dir);
+  bool step = lgc->isStep(x2, y2, dir);
+  bool step2 = (lgc->isStep(x2, y2, Direction::North) &&
+                lgc->isStep(x2, y2, Direction::East) &&
+                lgc->isStep(x2, y2, Direction::West) &&
+                lgc->isStep(x2, y2, Direction::South));
+  unsigned int dist = lgc->get_dist_val(x2, y2);
+
+  bool bool1 = goaled && (pt_list.size() == 1);
+
+  if (!goaled) {
+    if (!isWall && !step && dist < val) {
+      next_dir = dir;
+      val = dist;
+    } else if (!isWall && step && dist < val) {
+      next_dir = dir;
+      val = dist;
+    }
+  } else {
+    //  if (!isWall && !step2) {
+    //    next_dir = dir;
+    //    val = dist; //未探索有線固定
+    //  } else
+    if (!isWall && !step && dist <= val) {
+      next_dir = dir;
+      val = dist;
+    } else if (!isWall && step && dist < val) {
+      next_dir = dir;
+      val = dist;
+    }
+  }
+}
 
 bool Adachi::is_goal(int x, int y) {
   for (const auto p : lgc->goal_list)
@@ -97,27 +132,27 @@ Direction Adachi::detect_next_direction() {
   const bool stop = true;
   if (ego->dir == Direction::North) {
     setNextDirection(ego->x, ego->y + 1, Direction::North, next_dir, dist_val);
-    setNextDirection(ego->x + 1, ego->y, Direction::East, next_dir, dist_val);
-    setNextDirection(ego->x - 1, ego->y, Direction::West, next_dir, dist_val);
+    setNextDirection2(ego->x + 1, ego->y, Direction::East, next_dir, dist_val);
+    setNextDirection2(ego->x - 1, ego->y, Direction::West, next_dir, dist_val);
     if (enable_back || is_go_home() || stop)
       setNextDirection(ego->x, ego->y - 1, Direction::South, next_dir,
                        dist_val);
   } else if (ego->dir == Direction::East) {
     setNextDirection(ego->x + 1, ego->y, Direction::East, next_dir, dist_val);
-    setNextDirection(ego->x, ego->y - 1, Direction::South, next_dir, dist_val);
-    setNextDirection(ego->x, ego->y + 1, Direction::North, next_dir, dist_val);
+    setNextDirection2(ego->x, ego->y - 1, Direction::South, next_dir, dist_val);
+    setNextDirection2(ego->x, ego->y + 1, Direction::North, next_dir, dist_val);
     if (enable_back || is_go_home() || stop)
       setNextDirection(ego->x - 1, ego->y, Direction::West, next_dir, dist_val);
   } else if (ego->dir == Direction::West) {
     setNextDirection(ego->x - 1, ego->y, Direction::West, next_dir, dist_val);
-    setNextDirection(ego->x, ego->y + 1, Direction::North, next_dir, dist_val);
-    setNextDirection(ego->x, ego->y - 1, Direction::South, next_dir, dist_val);
+    setNextDirection2(ego->x, ego->y + 1, Direction::North, next_dir, dist_val);
+    setNextDirection2(ego->x, ego->y - 1, Direction::South, next_dir, dist_val);
     if (enable_back || is_go_home() || stop)
       setNextDirection(ego->x + 1, ego->y, Direction::East, next_dir, dist_val);
   } else if (ego->dir == Direction::South) {
     setNextDirection(ego->x, ego->y - 1, Direction::South, next_dir, dist_val);
-    setNextDirection(ego->x - 1, ego->y, Direction::West, next_dir, dist_val);
-    setNextDirection(ego->x + 1, ego->y, Direction::East, next_dir, dist_val);
+    setNextDirection2(ego->x - 1, ego->y, Direction::West, next_dir, dist_val);
+    setNextDirection2(ego->x + 1, ego->y, Direction::East, next_dir, dist_val);
     if (enable_back || is_go_home() || stop)
       setNextDirection(ego->x, ego->y + 1, Direction::North, next_dir,
                        dist_val);
@@ -224,11 +259,11 @@ int Adachi::exec(path_type &path) {
   deadEnd(ego->x, ego->y);
   if (goaled) {
     if (!goal_startpos_lock) {
-      if (lgc->is_stepped(next_goal_pt.x, next_goal_pt.y) ||
-          lgc->candidate_end(next_goal_pt.x, next_goal_pt.y) ||
-          lgc->get_dist_val(ego->x, ego->y) > limit ||
-          subgoal_list.size() == 0 || true) {
-
+      // if (lgc->is_stepped(next_goal_pt.x, next_goal_pt.y) ||
+      //     lgc->candidate_end(next_goal_pt.x, next_goal_pt.y) ||
+      //     lgc->get_dist_val(ego->x, ego->y) > limit ||
+      //     subgoal_list.size() == 0 || true) {
+      if (true) {
         // if (subgoal_list.size() == 0)
         {
           lgc->set_param3();

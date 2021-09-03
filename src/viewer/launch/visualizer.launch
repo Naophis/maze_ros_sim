@@ -1,7 +1,7 @@
 <launch>
     <!-- <node pkg="rviz" name="rviz" type="rviz" args="-d $(find viewer)/rviz/viewer.rviz" required="true" /> -->
 
-    <!-- <rosparam command="load" file="$(find maze_solver)/config/AJMM2011_MMC_FINAL.yaml" /> -->
+    <rosparam command="load" file="$(find maze_solver)/config/AJMM2011_MMC_FINAL.yaml" />
     <!-- <rosparam command="load" file="$(find maze_solver)/config/AJMM2012_MMC_FLESH.yaml" /> -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/AJMM2012_MMC_FINAL.yaml" /> -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/APEC2013_MMC.yaml" /> -->
@@ -501,7 +501,7 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2017hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2018hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2018hes.yaml" />  -->
-    <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2019hef.yaml" /> 
+    <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2019hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2019hes.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2014hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2015hef.yaml" />  -->
@@ -509,8 +509,8 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2017hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2018hef.yaml" />  -->
 
-    <param name="maze_data/known" value="1" />
-    <!-- <param name="maze_data/known" value="0" /> -->
+    <!-- <param name="maze_data/known" value="1" /> -->
+    <param name="maze_data/known" value="0" />
 
     <node pkg="tf" type="static_transform_publisher" name="world_map" args="0 0 0.2 0 0 0 world map 10" />
     <node pkg="tf" type="static_transform_publisher" name="world_base" args="0 0 0 0 0 0 map base 10" />
