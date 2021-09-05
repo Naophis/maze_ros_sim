@@ -488,8 +488,8 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/xx.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/yama2002.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/yama7.yaml" />  -->
-    <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/yama89.yaml" />  -->
-    <rosparam command="load" file="$(find maze_solver)/config/classic/zigzag.yaml" /> 
+    <rosparam command="load" file="$(find maze_solver)/config/classic/yama89.yaml" /> 
+    <!-- <rosparam command="load" file="$(find maze_solver)/config/classic/zigzag.yaml" />  -->
 
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2010hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2011hef.yaml" /> -->
@@ -510,8 +510,8 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2018hef.yaml" />  -->
 
     <param name="maze_data/known" value="1" />
-    <param name="chopped/dt" value="5.0" />
     <!-- <param name="maze_data/known" value="0" /> -->
+    <param name="chopped/dt" value="5.0" />
 
     <rosparam command="load" file="$(find maze_solver)/config/slalom.yaml" />
 
