@@ -111,6 +111,7 @@ typedef struct {
   float x;
   float y;
   float ang;
+  char type;
 } trajectory_point_t;
 
 constexpr initializer_list<Direction> direction_list = {
@@ -122,4 +123,23 @@ typedef struct {
   float ang;
   Direction dir;
 } ego_odom_t;
+
+typedef struct {
+  float radius;
+  float time;
+  float n;
+  float front;
+  float back;
+} slalom_param_t;
+
+typedef struct {
+  slalom_param_t normal;
+  slalom_param_t orval;
+  slalom_param_t large;
+  slalom_param_t dia45;
+  slalom_param_t dia45_2;
+  slalom_param_t dia135;
+  slalom_param_t dia135_2;
+  slalom_param_t dia90;
+} slalom_data_t;
 #endif

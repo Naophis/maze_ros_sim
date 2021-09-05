@@ -25,6 +25,8 @@ private:
   ros::Subscriber sub_base_path;
   ros::Subscriber sub_base_path_dia;
 
+  MarkerArrayPtr trajectory_mk_array;
+
   MarkerPtr mk_trajectory;
   TrajectoryCreator tc;
 
@@ -37,6 +39,7 @@ public:
   void base_path_callback(const my_msg::base_pathConstPtr &bp);
   void base_path_dia_callback(const my_msg::base_pathConstPtr &bp);
   void exec();
+  void set_turn_param();
 };
 
 TrajectorySimulator::TrajectorySimulator(/* args */) {}

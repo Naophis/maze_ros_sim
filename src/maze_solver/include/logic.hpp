@@ -150,14 +150,24 @@ public:
   }
 
   void set_param4() {
-    cell_size = 1;
-    double tmp = 5;
-    Dia = cell_size * 1.41421356 / tmp;
-    Dia2 = cell_size * 1.41421356 / tmp;
-    Dia3 = cell_size * 1.41421356 / tmp;
+    // cell_size = 1;
+    // double tmp = 5;
+    // Dia = cell_size * 1.41421356 / tmp;
+    // Dia2 = cell_size * 1.41421356 / tmp;
+    // Dia3 = cell_size * 1.41421356 / tmp;
+    // St1 = cell_size;
+    // St2 = cell_size / 2;
+    // St3 = cell_size / 4;
+
+
+    cell_size = 7;
+    Dia = cell_size * 1.41421356 / 2;
+    Dia2 = cell_size * 1.41421356 / 2 * 3 / 5;
+    Dia3 = cell_size * 1.41421356 / 2 * 2 / 5;
+
     St1 = cell_size;
-    St2 = cell_size / 2;
-    St3 = cell_size / 4;
+    St2 = cell_size * 3 / 7;
+    St3 = cell_size * 2 / 7;
   }
 
   void set_param5() {

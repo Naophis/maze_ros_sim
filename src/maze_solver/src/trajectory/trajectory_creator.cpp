@@ -61,26 +61,94 @@ float TrajectoryCreator::get_turn_tgt_ang(TurnType type) {
     return 3.14 / 2;
   else if (type == TurnType::Kojima)
     return 3.14 / 2;
-
   return 0;
 }
 
 float TrajectoryCreator::get_turn_rad(TurnType type) {
   if (type == TurnType::Normal)
-    return 97;
+    return sla_data.normal.radius;
   else if (type == TurnType::Orval)
-    return 130;
+    return sla_data.orval.radius;
   else if (type == TurnType::Large)
-    return 190;
+    return sla_data.large.radius;
   else if (type == TurnType::Dia45)
-    return 255;
+    return sla_data.dia45.radius;
   else if (type == TurnType::Dia135)
-    return 130;
+    return sla_data.dia135.radius;
   else if (type == TurnType::Dia90)
-    return 140;
-  else if (type == TurnType::Kojima)
-    return 180;
+    return sla_data.dia90.radius;
+  // else if (type == TurnType::Kojima)
+  //   return 90;
+  return 0;
+}
 
+float TrajectoryCreator::get_front_dist(TurnType type, bool dia) {
+  if (type == TurnType::Normal)
+    return sla_data.normal.front;
+  else if (type == TurnType::Orval)
+    return sla_data.orval.front;
+  else if (type == TurnType::Large)
+    return sla_data.large.front;
+  else if (type == TurnType::Dia45)
+    return !dia ? sla_data.dia45.front : sla_data.dia45_2.front;
+  else if (type == TurnType::Dia135)
+    return !dia ? sla_data.dia135.front : sla_data.dia135_2.front;
+  else if (type == TurnType::Dia90)
+    return sla_data.dia90.front;
+  // else if (type == TurnType::Kojima)
+  //   return 90;
+  return 0;
+}
+
+float TrajectoryCreator::get_back_dist(TurnType type, bool dia) {
+  if (type == TurnType::Normal)
+    return sla_data.normal.back;
+  else if (type == TurnType::Orval)
+    return sla_data.orval.back;
+  else if (type == TurnType::Large)
+    return sla_data.large.back;
+  else if (type == TurnType::Dia45)
+    return !dia ? sla_data.dia45.back : sla_data.dia45_2.back;
+  else if (type == TurnType::Dia135)
+    return !dia ? sla_data.dia135.back : sla_data.dia135_2.back;
+  else if (type == TurnType::Dia90)
+    return sla_data.dia90.back;
+  // else if (type == TurnType::Kojima)
+  //   return 90;
+  return 0;
+}
+float TrajectoryCreator::get_slalom_etn(TurnType type, bool dia) {
+  if (type == TurnType::Normal)
+    return sla_data.normal.n;
+  else if (type == TurnType::Orval)
+    return sla_data.orval.n;
+  else if (type == TurnType::Large)
+    return sla_data.large.n;
+  else if (type == TurnType::Dia45)
+    return !dia ? sla_data.dia45.n : sla_data.dia45_2.n;
+  else if (type == TurnType::Dia135)
+    return !dia ? sla_data.dia135.n : sla_data.dia135_2.n;
+  else if (type == TurnType::Dia90)
+    return sla_data.dia90.n;
+  // else if (type == TurnType::Kojima)
+  //   return 90;
+  return 0;
+}
+float TrajectoryCreator::get_slalom_time(TurnType type, bool dia) {
+  if (type == TurnType::Normal)
+    return sla_data.normal.time;
+  else if (type == TurnType::Orval)
+    return sla_data.orval.time;
+  else if (type == TurnType::Large)
+    return sla_data.large.time;
+  else if (type == TurnType::Dia45)
+    return !dia ? sla_data.dia45.time : sla_data.dia45_2.time;
+  else if (type == TurnType::Dia135)
+    return !dia ? sla_data.dia135.time : sla_data.dia135_2.time;
+  else if (type == TurnType::Dia90)
+    return sla_data.dia90.time;
+  // else if (type == TurnType::Kojima)
+  //   return 90;
   return 0;
 }
 
@@ -290,7 +358,7 @@ void TrajectoryCreator::fix_pos(ego_odom_t &ego, TurnType type,
         ego.y += 180;
       } else {
         ego.x -= 180;
-        ego.y += 80;
+        ego.y += 90;
       }
     } else if (ego.dir == Direction::SouthEast) {
       if (turn_dir == TurnDirection::Right) {
@@ -398,9 +466,10 @@ void TrajectoryCreator::fix_pos(ego_odom_t &ego, TurnType type,
 void TrajectoryCreator::exec2(path_struct &base_path,
                               vector<trajectory_point_t> &trajectory) {
   trajectory.clear();
-  
+
   trajectory_point_t trj_ele = {0};
-  float v_max = 2000;
+  float v_max = 1500;
+  float v_max2 = 5000;
   const double dt = 0.001;
   ego_odom_t ego;
   ego.x = ego.y = ego.ang = 0;
@@ -426,12 +495,13 @@ void TrajectoryCreator::exec2(path_struct &base_path,
       trj_ele.ang = ego.ang;
       trj_ele.x = ego.x;
       trj_ele.y = ego.y;
-
+      trj_ele.type = 0;
       trj_ele.ang = get_run_dir(ego.dir, trj_ele.ang);
+
       while (tmp_dist < dist) {
-        trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
-        trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
-        tmp_dist += v_max * dt;
+        trj_ele.x = trj_ele.x + v_max2 * sin(trj_ele.ang) * dt;
+        trj_ele.y = trj_ele.y + v_max2 * cos(trj_ele.ang) * dt;
+        tmp_dist += v_max2 * dt;
         trajectory.emplace_back(trj_ele);
       }
       ego.x = trj_ele.x;
@@ -443,30 +513,67 @@ void TrajectoryCreator::exec2(path_struct &base_path,
       float tgt_ang = get_turn_tgt_ang(turn_type);
       float radius = get_turn_rad(turn_type);
       float alpha = 2 * v_max * v_max / (radius * radius * tgt_ang / 2);
-
       if (turn_dir == TurnDirection::Left)
         alpha *= -1;
-
       float w = 0;
       trj_ele.ang = ego.ang;
       trj_ele.x = ego.x;
       trj_ele.y = ego.y;
 
-      float tmp_ang = 0;
-      while (abs(tmp_ang) < tgt_ang) {
-        if (abs(tmp_ang) >= tgt_ang / 2)
-          w += -alpha * dt;
-        else
-          w += alpha * dt;
+      dist = get_front_dist(turn_type, dia);
+      if (dist > 0) {
+        float tmp_dist = 0;
+        trj_ele.type = 1;
+        trj_ele.ang = get_run_dir(ego.dir, trj_ele.ang);
+        while (tmp_dist < dist) {
+          trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
+          trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
+          tmp_dist += v_max * dt;
+          trajectory.emplace_back(trj_ele);
+        }
+      }
 
-        trj_ele.ang += w * dt;
+      float tmp_ang = 0;
+      trj_ele.type = 2;
+      int sinCount = 1;
+      float slaTerm = get_slalom_time(turn_type, dia);
+      float etN = get_slalom_etn(turn_type, dia);
+      float alphaTemp = v_max / radius;
+      if (turn_dir == TurnDirection::Left)
+        alphaTemp *= -1;
+
+      while (abs(tmp_ang) < tgt_ang) {
+
+        if (dt * sinCount / slaTerm < 2.0) {
+          alpha = alphaTemp * Et2(dt * sinCount, slaTerm, etN);
+        } else {
+          alpha = 0;
+          w = 0;
+          break;
+        }
+        // ROS_WARN("%f",alpha);
+        w += alpha * dt;
         tmp_ang += abs(w) * dt;
+        trj_ele.ang += w * dt;
         trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
         trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
         trajectory.emplace_back(trj_ele);
+
+        sinCount++;
       }
-      // ego.x = trj_ele.x;
-      // ego.y = trj_ele.y;
+
+      dist = get_back_dist(turn_type, dia);
+      if (dist > 0) {
+        float tmp_dist = 0;
+        trj_ele.type = 3;
+        while (tmp_dist < dist) {
+          trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
+          trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
+          tmp_dist += v_max * dt;
+          trajectory.emplace_back(trj_ele);
+        }
+      }
+
       fix_pos(ego, turn_type, turn_dir);
       ego.dir = get_next_dir(ego.dir, turn_type, turn_dir);
       if (ego.dir == Direction::NorthEast || ego.dir == Direction::NorthWest ||
@@ -482,6 +589,14 @@ void TrajectoryCreator::exec2(path_struct &base_path,
       trajectory.emplace_back(trj_ele);
     }
   }
+}
+
+float TrajectoryCreator::Et2(float t, float s, float N) {
+  const float z = 1.0f;
+  t = t / s;
+  float P = pow((t - z), N - z);
+  float Q = P * (t - z);
+  return -N * P / ((Q - z) * (Q - z)) * pow(exp(1), z + z / (Q - z)) / s;
 }
 TrajectoryCreator::TrajectoryCreator(/* args */) {}
 

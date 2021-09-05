@@ -1,0 +1,50 @@
+slalom:
+  velocity: 1500
+  normal:
+    radius: 65.0
+    time: 0.0446
+    n: 4.0
+    front: 9.0731
+    back: 8.2268
+  large: 
+    radius: 130.0
+    time: 0.08918750
+    n: 4.0
+    front: 17.58353240
+    back: 16.64089446
+  orval: 
+    radius: 86.30025
+    time: 0.1184
+    n: 4.0
+    front: 40.0
+    back: 38.9909
+  dia45: 
+    radius: 145.0
+    time: 0.0497
+    n: 4.0
+    front: 12.6878
+    back: 49.1819
+  dia45_2: 
+    radius: 145.0
+    time: 0.0497
+    n: 4.0
+    front: 49.96
+    back: 11.9027
+  dia135:
+    radius: 85.0
+    time: 0.0875
+    n: 4.0
+    front: 29.5457
+    back: 13.2701
+  dia135_2:
+    radius: 85.0
+    time: 0.0875
+    n: 4.0
+    front: 14.1041
+    back: 28.7117
+  dia90: 
+    radius: 90.0
+    time: 0.0617
+    n: 4.0
+    front: 15.0110
+    back: 14.2437

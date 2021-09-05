@@ -270,28 +270,29 @@ int Adachi::exec(path_type &path) {
           calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
           cost_mode = 3;
         }
+
+        if (subgoal_list.size() == 0) {
+          lgc->set_param4();
+          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
+          cost_mode = 4;
+        }
         if (subgoal_list.size() == 0) {
           lgc->set_param1();
           calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
-          if (subgoal_list.size() <= 2)
-            subgoal_list.clear();
-          else
-            cost_mode = 1;
+          // if (subgoal_list.size() <= 2)
+          //   subgoal_list.clear();
+          // else
+          cost_mode = 1;
         }
         if (subgoal_list.size() == 0) {
           lgc->set_param2();
           calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
-          if (subgoal_list.size() <= 2)
-            subgoal_list.clear();
-          else
-            cost_mode = 2;
+          // if (subgoal_list.size() <= 2)
+          //   subgoal_list.clear();
+          // else
+          cost_mode = 2;
         }
 
-        // if (subgoal_list.size() == 0) {
-        //   lgc->set_param4();
-        //   calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
-        //   cost_mode = 4;
-        // }
         // if (subgoal_list.size() == 0) {
         //   lgc->set_param5();
         //   calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
