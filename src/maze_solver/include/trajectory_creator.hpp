@@ -11,7 +11,6 @@ using namespace std;
 
 constexpr double ROOT2 = sqrt(2);
 constexpr double dt = 0.001;
-constexpr double chop_dt = 3;
 constexpr double eps = 0.001;
 class TrajectoryCreator {
 private:
@@ -48,14 +47,26 @@ private:
 
   base_trajectory_pattern_t zipped_trj;
 
+  void slalom2(vector<trajectory_point_t> &trajectory, int turn_num,
+               trajectory_point_t &trj_ele, ego_odom_t &ego, run_param_t &param,
+               bool dia);
+
+  void repaint_slalom(vector<trajectory_point_t> &trajectory,
+                      vector<trajectory_point_t> &base_trj,
+                      trajectory_point_t &trj_ele, ego_odom_t &ego,
+                      run_param_t &param, TurnDirection turn_dir,
+                      TurnType type);
+
 public:
   TrajectoryCreator(/* args */);
   ~TrajectoryCreator();
   void init();
   void exec(path_struct &base_path, vector<trajectory_point_t> &trajectory);
   void exec2(path_struct &base_path, vector<trajectory_point_t> &trajectory);
+  void exec3(path_struct &base_path, vector<trajectory_point_t> &trajectory);
   void make_chopped_trajectory(vector<trajectory_point_t> &trajectory,
                                int turn_num, bool dia);
+  double chop_dt = 3;
   slalom_data_t sla_data;
 };
 

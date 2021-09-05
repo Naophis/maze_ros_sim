@@ -12,7 +12,8 @@ void TrajectorySimulator::base_path_dia_callback(
   }
   base_path.size = bp->size;
   vector<trajectory_point_t> trajectory;
-  tc.exec2(base_path, trajectory);
+  // tc.exec2(base_path, trajectory);
+  tc.exec3(base_path, trajectory);
 
   trajectory_mk_array->markers.resize(1);
   trajectory_mk_array->markers[0].action = Marker::DELETEALL;
@@ -180,7 +181,7 @@ void TrajectorySimulator::timer_callback(const ros::TimerEvent &e) {
   back_str_line.color.b = 0;
   back_str_line.color.a = 1;
 
-  for (const auto trj : trajectory.dia135) {
+  for (const auto trj : trajectory.dia45_2) {
     geometry_msgs::Point p;
     p.x = trj.x / 1000;
     p.y = trj.y / 1000;
@@ -201,6 +202,8 @@ void TrajectorySimulator::timer_callback(const ros::TimerEvent &e) {
 
 void TrajectorySimulator::set_turn_param() {
   XmlRpc::XmlRpcValue prm;
+  _nh.getParam("/chopped", prm);
+  tc.chop_dt = static_cast<double>(prm["dt"]);
   _nh.getParam("/slalom", prm);
   tc.sla_data = {0};
 

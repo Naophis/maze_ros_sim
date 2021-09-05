@@ -6,9 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Grid1/Offset1
-        - /base_path1
-        - /route1
-        - /test_trajectory1
       Splitter Ratio: 0.3872458338737488
     Tree Height: 1346
   - Class: rviz/Selection
@@ -79,13 +76,13 @@ Visualization Manager:
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /viewer/maze_diainfo_list
       Name: step_map_dia
       Namespaces:
-        {}
+        map: true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/Marker
       Enabled: false
       Marker Topic: /viewer/path_marker
@@ -132,23 +129,24 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /viewer/base_path_dia
       Name: route
+      Namespaces:
+        points_and_back_str_lines: true
+        points_and_front_str_lines: true
+        points_and_straight_lines: true
+        points_and_turn_lines: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /viewer/base_path_dia2
+      Name: test_trajectory
       Namespaces:
         {}
       Queue Size: 100
       Value: false
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /viewer/base_path_dia2
-      Name: test_trajectory
-      Namespaces:
-        points_and_back_str_lines: true
-        points_and_front_str_lines: true
-        points_and_turn_lines: true
-      Queue Size: 100
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 50; 50; 50
@@ -184,10 +182,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 7316.626953125
+      Scale: 614.7674560546875
       Target Frame: <Fixed Frame>
-      X: 0.13425074517726898
-      Y: 0.14594075083732605
+      X: 1.4500000476837158
+      Y: 1.4500000476837158
     Saved:
       - Angle: 0
         Class: rviz/TopDownOrtho
