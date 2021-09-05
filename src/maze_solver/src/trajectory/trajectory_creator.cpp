@@ -21,10 +21,10 @@ TurnType TrajectoryCreator::get_turn_type(int turn_num) {
   return TurnType::Finish;
 }
 
-TurnDirection TrajectoryCreator::get_turn_dir(int turn_dir) {
-  if (turn_dir == 255 || turn_dir == 0)
+TurnDirection TrajectoryCreator::get_turn_dir(int turn_num) {
+  if (turn_num == 255 || turn_num == 0)
     return TurnDirection::End;
-  return (turn_dir & 0x01) == 0x01 ? TurnDirection::Right : TurnDirection::Left;
+  return (turn_num & 0x01) == 0x01 ? TurnDirection::Right : TurnDirection::Left;
 }
 float TrajectoryCreator::get_run_dir(Direction dir, float ang) {
   if (dir == Direction::North)
@@ -244,224 +244,225 @@ Direction TrajectoryCreator::get_next_dir(Direction dir, TurnType type,
   return dir;
 }
 void TrajectoryCreator::fix_pos(ego_odom_t &ego, TurnType type,
-                                TurnDirection turn_dir) {
+                                TurnDirection turn_dir,
+                                trajectory_point_t &trj_ele) {
   if (type == TurnType::Normal) {
     if (ego.dir == Direction::North) {
-      ego.y += 90;
+      ego.y += half_cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.x += 90;
+        ego.x += half_cell_size;
       else
-        ego.x -= 90;
+        ego.x -= half_cell_size;
     } else if (ego.dir == Direction::East) {
-      ego.x += 90;
+      ego.x += half_cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.y -= 90;
+        ego.y -= half_cell_size;
       else
-        ego.y += 90;
+        ego.y += half_cell_size;
     } else if (ego.dir == Direction::West) {
-      ego.x -= 90;
+      ego.x -= half_cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.y += 90;
+        ego.y += half_cell_size;
       else
-        ego.y -= 90;
+        ego.y -= half_cell_size;
     } else if (ego.dir == Direction::South) {
-      ego.y -= 90;
+      ego.y -= half_cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.x -= 90;
+        ego.x -= half_cell_size;
       else
-        ego.x += 90;
+        ego.x += half_cell_size;
     }
   } else if (type == TurnType::Orval) {
     if (ego.dir == Direction::North) {
       if (turn_dir == TurnDirection::Right)
-        ego.x += 180;
+        ego.x += cell_size;
       else
-        ego.x -= 180;
+        ego.x -= cell_size;
     } else if (ego.dir == Direction::East) {
       if (turn_dir == TurnDirection::Right)
-        ego.y -= 180;
+        ego.y -= cell_size;
       else
-        ego.y += 180;
+        ego.y += cell_size;
     } else if (ego.dir == Direction::West) {
       if (turn_dir == TurnDirection::Right)
-        ego.y += 180;
+        ego.y += cell_size;
       else
-        ego.y -= 180;
+        ego.y -= cell_size;
     } else if (ego.dir == Direction::South) {
       if (turn_dir == TurnDirection::Right)
-        ego.x -= 180;
+        ego.x -= cell_size;
       else
-        ego.x += 180;
+        ego.x += cell_size;
     }
   } else if (type == TurnType::Large) {
     if (ego.dir == Direction::North) {
-      ego.y += 180;
+      ego.y += cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.x += 180;
+        ego.x += cell_size;
       else
-        ego.x -= 180;
+        ego.x -= cell_size;
     } else if (ego.dir == Direction::East) {
-      ego.x += 180;
+      ego.x += cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.y -= 180;
+        ego.y -= cell_size;
       else
-        ego.y += 180;
+        ego.y += cell_size;
     } else if (ego.dir == Direction::West) {
-      ego.x -= 180;
+      ego.x -= cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.y += 180;
+        ego.y += cell_size;
       else
-        ego.y -= 180;
+        ego.y -= cell_size;
     } else if (ego.dir == Direction::South) {
-      ego.y -= 180;
+      ego.y -= cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.x -= 180;
+        ego.x -= cell_size;
       else
-        ego.x += 180;
+        ego.x += cell_size;
     }
   } else if (type == TurnType::Dia45) {
     if (ego.dir == Direction::North) {
-      ego.y += 180;
+      ego.y += cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.x += 90;
+        ego.x += half_cell_size;
       else
-        ego.x -= 90;
+        ego.x -= half_cell_size;
     } else if (ego.dir == Direction::East) {
-      ego.x += 180;
+      ego.x += cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.y -= 90;
+        ego.y -= half_cell_size;
       else
-        ego.y += 90;
+        ego.y += half_cell_size;
     } else if (ego.dir == Direction::West) {
-      ego.x -= 180;
+      ego.x -= cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.y += 90;
+        ego.y += half_cell_size;
       else
-        ego.y -= 90;
+        ego.y -= half_cell_size;
     } else if (ego.dir == Direction::South) {
-      ego.y -= 180;
+      ego.y -= cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.x -= 90;
+        ego.x -= half_cell_size;
       else
-        ego.x += 90;
+        ego.x += half_cell_size;
     } else if (ego.dir == Direction::NorthEast) {
       if (turn_dir == TurnDirection::Right) {
-        ego.x += 180;
-        ego.y += 90;
+        ego.x += cell_size;
+        ego.y += half_cell_size;
       } else {
-        ego.x += 90;
-        ego.y += 180;
+        ego.x += half_cell_size;
+        ego.y += cell_size;
       }
     } else if (ego.dir == Direction::NorthWest) {
       if (turn_dir == TurnDirection::Right) {
-        ego.x -= 90;
-        ego.y += 180;
+        ego.x -= half_cell_size;
+        ego.y += cell_size;
       } else {
-        ego.x -= 180;
-        ego.y += 90;
+        ego.x -= cell_size;
+        ego.y += half_cell_size;
       }
     } else if (ego.dir == Direction::SouthEast) {
       if (turn_dir == TurnDirection::Right) {
-        ego.x += 90;
-        ego.y -= 180;
+        ego.x += half_cell_size;
+        ego.y -= cell_size;
       } else {
-        ego.x += 180;
-        ego.y -= 90;
+        ego.x += cell_size;
+        ego.y -= half_cell_size;
       }
     } else if (ego.dir == Direction::SouthWest) {
       if (turn_dir == TurnDirection::Right) {
-        ego.x -= 180;
-        ego.y -= 90;
+        ego.x -= cell_size;
+        ego.y -= half_cell_size;
       } else {
-        ego.x -= 90;
-        ego.y -= 180;
+        ego.x -= half_cell_size;
+        ego.y -= cell_size;
       }
     }
   } else if (type == TurnType::Dia135) {
     if (ego.dir == Direction::North) {
-      ego.y += 90;
+      ego.y += half_cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.x += 180;
+        ego.x += cell_size;
       else
-        ego.x -= 180;
+        ego.x -= cell_size;
     } else if (ego.dir == Direction::East) {
-      ego.x += 90;
+      ego.x += half_cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.y -= 180;
+        ego.y -= cell_size;
       else
-        ego.y += 180;
+        ego.y += cell_size;
     } else if (ego.dir == Direction::West) {
-      ego.x -= 90;
+      ego.x -= half_cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.y += 180;
+        ego.y += cell_size;
       else
-        ego.y -= 180;
+        ego.y -= cell_size;
     } else if (ego.dir == Direction::South) {
-      ego.y -= 90;
+      ego.y -= half_cell_size;
       if (turn_dir == TurnDirection::Right)
-        ego.x -= 180;
+        ego.x -= cell_size;
       else
-        ego.x += 180;
+        ego.x += cell_size;
     } else if (ego.dir == Direction::NorthEast) {
       if (turn_dir == TurnDirection::Right) {
-        ego.x += 180;
-        ego.y -= 90;
+        ego.x += cell_size;
+        ego.y -= half_cell_size;
       } else {
-        ego.x -= 90;
-        ego.y += 180;
+        ego.x -= half_cell_size;
+        ego.y += cell_size;
       }
     } else if (ego.dir == Direction::NorthWest) {
       if (turn_dir == TurnDirection::Right) {
-        ego.x += 90;
-        ego.y += 180;
+        ego.x += half_cell_size;
+        ego.y += cell_size;
       } else {
-        ego.x -= 180;
-        ego.y -= 90;
+        ego.x -= cell_size;
+        ego.y -= half_cell_size;
       }
     } else if (ego.dir == Direction::SouthEast) {
       if (turn_dir == TurnDirection::Right) {
-        ego.x -= 90;
-        ego.y -= 180;
+        ego.x -= half_cell_size;
+        ego.y -= cell_size;
       } else {
-        ego.x += 180;
-        ego.y += 90;
+        ego.x += cell_size;
+        ego.y += half_cell_size;
       }
     } else if (ego.dir == Direction::SouthWest) {
       if (turn_dir == TurnDirection::Right) {
-        ego.x -= 180;
-        ego.y += 90;
+        ego.x -= cell_size;
+        ego.y += half_cell_size;
       } else {
-        ego.x += 90;
-        ego.y -= 180;
+        ego.x += half_cell_size;
+        ego.y -= cell_size;
       }
     }
   } else if (type == TurnType::Dia90) {
     if (ego.dir == Direction::NorthEast) {
-      if (turn_dir == TurnDirection::Right) {
-        ego.x += 180;
-      } else {
-        ego.y += 180;
-      }
+      if (turn_dir == TurnDirection::Right)
+        ego.x += cell_size;
+      else
+        ego.y += cell_size;
     } else if (ego.dir == Direction::NorthWest) {
-      if (turn_dir == TurnDirection::Right) {
-        ego.y += 180;
-      } else {
-        ego.x -= 180;
-      }
+      if (turn_dir == TurnDirection::Right)
+        ego.y += cell_size;
+      else
+        ego.x -= cell_size;
     } else if (ego.dir == Direction::SouthEast) {
-      if (turn_dir == TurnDirection::Right) {
-        ego.y -= 180;
-      } else {
-        ego.x += 180;
-      }
+      if (turn_dir == TurnDirection::Right)
+        ego.y -= cell_size;
+      else
+        ego.x += cell_size;
     } else if (ego.dir == Direction::SouthWest) {
-      if (turn_dir == TurnDirection::Right) {
-        ego.x -= 180;
-      } else {
-        ego.y -= 180;
-      }
+      if (turn_dir == TurnDirection::Right)
+        ego.x -= cell_size;
+      else
+        ego.y -= cell_size;
     }
   }
+  ego.ang = trj_ele.ang;
+  trj_ele.ang = ego.ang;
+  trj_ele.x = ego.x;
+  trj_ele.y = ego.y;
 }
 void TrajectoryCreator::exec2(path_struct &base_path,
                               vector<trajectory_point_t> &trajectory) {
@@ -470,7 +471,6 @@ void TrajectoryCreator::exec2(path_struct &base_path,
   trajectory_point_t trj_ele = {0};
   float v_max = 1500;
   float v_max2 = 5000;
-  const double dt = 0.001;
   ego_odom_t ego;
   ego.x = ego.y = ego.ang = 0;
   ego.dir = Direction::North;
@@ -478,7 +478,9 @@ void TrajectoryCreator::exec2(path_struct &base_path,
 
   TurnDirection turn_dir = TurnDirection::None;
   TurnType turn_type = TurnType::None;
-
+  run_param_t param = {0};
+  param.v_max = 5000;
+  param.turn_v = 1500;
   for (const auto bp : base_path.paths) {
     float dist = 0.5 * bp.s * 180;
     float dist2 = 0.5 * bp.s - 1;
@@ -490,102 +492,41 @@ void TrajectoryCreator::exec2(path_struct &base_path,
 
     if (dist > 0 && dist2 > 0) {
       dist = !dia ? (dist2 * 180) : (dist2 * 180 * ROOT2);
-
-      float tmp_dist = 0;
-      trj_ele.ang = ego.ang;
-      trj_ele.x = ego.x;
-      trj_ele.y = ego.y;
-      trj_ele.type = 0;
-      trj_ele.ang = get_run_dir(ego.dir, trj_ele.ang);
-
-      while (tmp_dist < dist) {
-        trj_ele.x = trj_ele.x + v_max2 * sin(trj_ele.ang) * dt;
-        trj_ele.y = trj_ele.y + v_max2 * cos(trj_ele.ang) * dt;
-        tmp_dist += v_max2 * dt;
-        trajectory.emplace_back(trj_ele);
-      }
-      ego.x = trj_ele.x;
-      ego.y = trj_ele.y;
-      ego.ang = trj_ele.ang;
+      run_straight(trajectory, dist, trj_ele, ego, param, 0);
     }
 
     if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
-      float tgt_ang = get_turn_tgt_ang(turn_type);
-      float radius = get_turn_rad(turn_type);
-      float alpha = 2 * v_max * v_max / (radius * radius * tgt_ang / 2);
-      if (turn_dir == TurnDirection::Left)
-        alpha *= -1;
-      float w = 0;
+
       trj_ele.ang = ego.ang;
       trj_ele.x = ego.x;
       trj_ele.y = ego.y;
 
+      // 前距離
       dist = get_front_dist(turn_type, dia);
-      if (dist > 0) {
-        float tmp_dist = 0;
-        trj_ele.type = 1;
-        trj_ele.ang = get_run_dir(ego.dir, trj_ele.ang);
-        while (tmp_dist < dist) {
-          trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
-          trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
-          tmp_dist += v_max * dt;
-          trajectory.emplace_back(trj_ele);
-        }
-      }
+      if (dist > 0)
+        run_straight(trajectory, dist, trj_ele, ego, param, 1);
 
-      float tmp_ang = 0;
-      trj_ele.type = 2;
-      int sinCount = 1;
-      float slaTerm = get_slalom_time(turn_type, dia);
-      float etN = get_slalom_etn(turn_type, dia);
-      float alphaTemp = v_max / radius;
-      if (turn_dir == TurnDirection::Left)
-        alphaTemp *= -1;
+      // 旋回
+      slalom(trajectory, bp.t, trj_ele, ego, param, dia);
 
-      while (abs(tmp_ang) < tgt_ang) {
-
-        if (dt * sinCount / slaTerm < 2.0) {
-          alpha = alphaTemp * Et2(dt * sinCount, slaTerm, etN);
-        } else {
-          alpha = 0;
-          w = 0;
-          break;
-        }
-        // ROS_WARN("%f",alpha);
-        w += alpha * dt;
-        tmp_ang += abs(w) * dt;
-        trj_ele.ang += w * dt;
-        trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
-        trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
-        trajectory.emplace_back(trj_ele);
-
-        sinCount++;
-      }
-
+      // 後距離
       dist = get_back_dist(turn_type, dia);
-      if (dist > 0) {
-        float tmp_dist = 0;
-        trj_ele.type = 3;
-        while (tmp_dist < dist) {
-          trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
-          trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
-          tmp_dist += v_max * dt;
-          trajectory.emplace_back(trj_ele);
-        }
-      }
+      if (dist > 0)
+        run_straight(trajectory, dist, trj_ele, ego, param, 3);
 
-      fix_pos(ego, turn_type, turn_dir);
-      ego.dir = get_next_dir(ego.dir, turn_type, turn_dir);
-      if (ego.dir == Direction::NorthEast || ego.dir == Direction::NorthWest ||
-          ego.dir == Direction::SouthEast || ego.dir == Direction::SouthWest) {
-        dia = true;
+      if (true) {
+        fix_pos(ego, turn_type, turn_dir, trj_ele);
       } else {
-        dia = false;
+        ego.x = trj_ele.x;
+        ego.y = trj_ele.y;
+        ego.ang = trj_ele.ang;
       }
-      ego.ang = trj_ele.ang;
-      trj_ele.ang = ego.ang;
-      trj_ele.x = ego.x;
-      trj_ele.y = ego.y;
+      ego.dir = get_next_dir(ego.dir, turn_type, turn_dir);
+
+      dia =
+          (ego.dir == Direction::NorthEast || ego.dir == Direction::NorthWest ||
+           ego.dir == Direction::SouthEast || ego.dir == Direction::SouthWest);
+
       trajectory.emplace_back(trj_ele);
     }
   }
@@ -597,6 +538,73 @@ float TrajectoryCreator::Et2(float t, float s, float N) {
   float P = pow((t - z), N - z);
   float Q = P * (t - z);
   return -N * P / ((Q - z) * (Q - z)) * pow(exp(1), z + z / (Q - z)) / s;
+}
+
+void TrajectoryCreator::run_straight(vector<trajectory_point_t> &trajectory,
+                                     float dist, trajectory_point_t &trj_ele,
+                                     ego_odom_t &ego, run_param_t &param,
+                                     char type) {
+  float tmp_dist = 0;
+  float v_max = param.v_max;
+
+  if (type == 0) {
+    trj_ele.ang = ego.ang;
+    trj_ele.x = ego.x;
+    trj_ele.y = ego.y;
+    trj_ele.ang = get_run_dir(ego.dir, trj_ele.ang);
+  }
+  trj_ele.type = type;
+
+  while (tmp_dist < dist) {
+    trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
+    trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
+    tmp_dist += v_max * dt;
+    trajectory.emplace_back(trj_ele);
+  }
+
+  if (type == 0) {
+    ego.x = trj_ele.x;
+    ego.y = trj_ele.y;
+    ego.ang = trj_ele.ang;
+  }
+}
+void TrajectoryCreator::slalom(vector<trajectory_point_t> &trajectory,
+                               int turn_num, trajectory_point_t &trj_ele,
+                               ego_odom_t &ego, run_param_t &param, bool dia) {
+  float tmp_ang = 0;
+  int sinCount = 1;
+
+  float v_max = param.turn_v;
+  TurnType turn_type = get_turn_type(turn_num);
+  TurnDirection turn_dir = get_turn_dir(turn_num);
+  float tgt_ang = get_turn_tgt_ang(turn_type);
+  float radius = get_turn_rad(turn_type);
+  float slaTerm = get_slalom_time(turn_type, dia);
+  float etN = get_slalom_etn(turn_type, dia);
+  float alphaTemp = v_max / radius;
+  float w = 0;
+  float alpha = 0;
+
+  trj_ele.type = 2;
+  if (turn_dir == TurnDirection::Left)
+    alphaTemp *= -1;
+
+  while (abs(tmp_ang) < tgt_ang) {
+    if (dt * sinCount / slaTerm < 2.0) {
+      alpha = alphaTemp * Et2(dt * sinCount, slaTerm, etN);
+    } else {
+      alpha = 0;
+      w = 0;
+      break;
+    }
+    w += alpha * dt;
+    tmp_ang += abs(w) * dt;
+    trj_ele.ang += w * dt;
+    trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
+    trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
+    trajectory.emplace_back(trj_ele);
+    sinCount++;
+  }
 }
 TrajectoryCreator::TrajectoryCreator(/* args */) {}
 

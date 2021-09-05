@@ -142,4 +142,11 @@ typedef struct {
   slalom_param_t dia135_2;
   slalom_param_t dia90;
 } slalom_data_t;
+
+typedef struct {
+  float v_max;
+  float accl;
+  float decel;
+  float turn_v;
+} run_param_t;
 #endif
