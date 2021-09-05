@@ -106,7 +106,98 @@ void TrajectorySimulator::base_path_dia_callback(
 void TrajectorySimulator::base_path_callback(
     const my_msg::base_pathConstPtr &bp) {}
 
-void TrajectorySimulator::timer_callback(const ros::TimerEvent &e) {}
+void TrajectorySimulator::make_all_trajectory() {
+  vector<trajectory_point_t> trajectory;
+  tc.make_chopped_trajectory(trajectory, 3, false);
+}
+
+void TrajectorySimulator::timer_callback(const ros::TimerEvent &e) {
+  //
+  base_trajectory_pattern_t trajectory;
+  tc.make_chopped_trajectory(trajectory.normal, 1, false);
+  tc.make_chopped_trajectory(trajectory.orval, 3, false);
+  tc.make_chopped_trajectory(trajectory.large, 5, false);
+  tc.make_chopped_trajectory(trajectory.dia45, 7, false);
+  tc.make_chopped_trajectory(trajectory.dia45_2, 7, true);
+  tc.make_chopped_trajectory(trajectory.dia135, 9, false);
+  tc.make_chopped_trajectory(trajectory.dia135_2, 9, true);
+  tc.make_chopped_trajectory(trajectory.dia90, 11, true);
+
+  ROS_WARN("%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, ", trajectory.normal.size(),
+           trajectory.orval.size(), trajectory.large.size(),
+           trajectory.dia45.size(), trajectory.dia45_2.size(),
+           trajectory.dia135.size(), trajectory.dia135_2.size(),
+           trajectory.dia90.size());
+
+  test_trajectory_mk_array->markers.resize(1);
+  test_trajectory_mk_array->markers[0].action = Marker::DELETEALL;
+
+  visualization_msgs::Marker front_str_line;
+  front_str_line.header.frame_id = "maze_base";
+  front_str_line.header.stamp = ros::Time::now();
+  front_str_line.ns = "points_and_front_str_lines";
+  front_str_line.action = visualization_msgs::Marker::ADD;
+  front_str_line.pose.orientation.w = 0.000;
+  front_str_line.id = 3;
+  front_str_line.type = visualization_msgs::Marker::POINTS;
+  front_str_line.scale.x = 0.005;
+  front_str_line.scale.y = 0.005;
+  front_str_line.scale.z = 0.005;
+  front_str_line.color.r = 0.5;
+  front_str_line.color.g = 0.5;
+  front_str_line.color.b = 1;
+  front_str_line.color.a = 1;
+
+  visualization_msgs::Marker turn_line;
+  turn_line.header.frame_id = "maze_base";
+  turn_line.header.stamp = ros::Time::now();
+  turn_line.ns = "points_and_turn_lines";
+  turn_line.action = visualization_msgs::Marker::ADD;
+  turn_line.pose.orientation.w = 0.000;
+  turn_line.id = 4;
+  turn_line.type = visualization_msgs::Marker::POINTS;
+  turn_line.scale.x = 0.005;
+  turn_line.scale.y = 0.005;
+  turn_line.scale.z = 0.005;
+  turn_line.color.r = 1;
+  turn_line.color.g = 0.5;
+  turn_line.color.b = 1;
+  turn_line.color.a = 1;
+
+  visualization_msgs::Marker back_str_line;
+  back_str_line.header.frame_id = "maze_base";
+  back_str_line.header.stamp = ros::Time::now();
+  back_str_line.ns = "points_and_back_str_lines";
+  back_str_line.action = visualization_msgs::Marker::ADD;
+  back_str_line.pose.orientation.w = 0.000;
+  back_str_line.id = 5;
+  back_str_line.type = visualization_msgs::Marker::POINTS;
+  back_str_line.scale.x = 0.005;
+  back_str_line.scale.y = 0.005;
+  back_str_line.scale.z = 0.005;
+  back_str_line.color.r = 1;
+  back_str_line.color.g = 0;
+  back_str_line.color.b = 0;
+  back_str_line.color.a = 1;
+
+  for (const auto trj : trajectory.dia135) {
+    geometry_msgs::Point p;
+    p.x = trj.x / 1000;
+    p.y = trj.y / 1000;
+    p.z = 0.01;
+    if (trj.type == 1) {
+      front_str_line.points.emplace_back(p);
+    } else if (trj.type == 2) {
+      turn_line.points.emplace_back(p);
+    } else if (trj.type == 3) {
+      back_str_line.points.emplace_back(p);
+    }
+  }
+  test_trajectory_mk_array->markers.emplace_back(front_str_line);
+  test_trajectory_mk_array->markers.emplace_back(turn_line);
+  test_trajectory_mk_array->markers.emplace_back(back_str_line);
+  pub_test_trajectory.publish(test_trajectory_mk_array);
+}
 
 void TrajectorySimulator::set_turn_param() {
   XmlRpc::XmlRpcValue prm;
@@ -160,14 +251,18 @@ void TrajectorySimulator::set_turn_param() {
   tc.sla_data.dia90.n = static_cast<double>(prm["dia90"]["n"]);
   tc.sla_data.dia90.front = static_cast<double>(prm["dia90"]["front"]);
   tc.sla_data.dia90.back = static_cast<double>(prm["dia90"]["back"]);
+
+  tc.init();
 }
 
 void TrajectorySimulator::init() {
-  // timer = _nh.createTimer(ros::Duration(0.1),
-  //                         &TrajectorySimulator::timer_callback, this);
   set_turn_param();
-  sub_base_path = _nh.subscribe("/base_path", 10,
-                                &TrajectorySimulator::base_path_callback, this);
+
+  // timer = _nh.createTimer(ros::Duration(0.2),
+  //                         &TrajectorySimulator::timer_callback, this);
+  // sub_base_path = _nh.subscribe("/base_path", 10,
+  //                               &TrajectorySimulator::base_path_callback,
+  //                               this);
 
   sub_base_path_dia = _nh.subscribe(
       "/base_path_dia", 10, &TrajectorySimulator::base_path_dia_callback, this);
@@ -175,7 +270,9 @@ void TrajectorySimulator::init() {
 
   pub_trajectory = _nh.advertise<Marker>("/viewer/base_path", 1);
   trajectory_mk_array.reset(new MarkerArray);
+  test_trajectory_mk_array.reset(new MarkerArray);
   pub_trajectory_dia = _nh.advertise<MarkerArray>("/viewer/base_path_dia", 1);
+  pub_test_trajectory = _nh.advertise<MarkerArray>("/viewer/base_path_dia2", 1);
 }
 
 int main(int argc, char **argv) {

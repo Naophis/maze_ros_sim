@@ -149,4 +149,15 @@ typedef struct {
   float decel;
   float turn_v;
 } run_param_t;
+
+typedef struct {
+  vector<trajectory_point_t> normal;
+  vector<trajectory_point_t> orval;
+  vector<trajectory_point_t> large;
+  vector<trajectory_point_t> dia45;
+  vector<trajectory_point_t> dia45_2;
+  vector<trajectory_point_t> dia135;
+  vector<trajectory_point_t> dia135_2;
+  vector<trajectory_point_t> dia90;
+} base_trajectory_pattern_t;
 #endif

@@ -606,6 +606,221 @@ void TrajectoryCreator::slalom(vector<trajectory_point_t> &trajectory,
     sinCount++;
   }
 }
+void TrajectoryCreator::make_chopped_trajectory(
+    vector<trajectory_point_t> &result, int turn_num, bool dia) {
+  float v_max = 1500;
+  float v_max2 = 5000;
+
+  ego_odom_t ego = {0};
+  vector<trajectory_point_t> base_trajectory;
+  trajectory_point_t trj_ele = {0};
+  run_param_t param = {0};
+  param.v_max = 500;
+  param.turn_v = 1500;
+
+  TurnDirection turn_dir = get_turn_dir(turn_num);
+  TurnType turn_type = get_turn_type(turn_num);
+
+  float dist = 0;
+  if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
+
+    trj_ele.ang = ego.ang;
+    trj_ele.x = ego.x;
+    trj_ele.y = ego.y;
+
+    // 前距離
+    dist = get_front_dist(turn_type, dia);
+    if (dist > 0)
+      run_straight(base_trajectory, dist, trj_ele, ego, param, 1);
+
+    // 旋回
+    slalom(base_trajectory, turn_num, trj_ele, ego, param, dia);
+
+    // 後距離
+    dist = get_back_dist(turn_type, dia);
+    if (dist > 0)
+      run_straight(base_trajectory, dist, trj_ele, ego, param, 3);
+
+    if (true) {
+      fix_pos(ego, turn_type, turn_dir, trj_ele);
+    } else {
+      ego.x = trj_ele.x;
+      ego.y = trj_ele.y;
+      ego.ang = trj_ele.ang;
+    }
+    ego.dir = get_next_dir(ego.dir, turn_type, turn_dir);
+
+    dia = (ego.dir == Direction::NorthEast || ego.dir == Direction::NorthWest ||
+           ego.dir == Direction::SouthEast || ego.dir == Direction::SouthWest);
+
+    base_trajectory.emplace_back(trj_ele);
+  }
+  int trj_size = base_trajectory.size();
+  trj_ele = {0};
+  if (base_trajectory.size() > 0) {
+
+    int from_idx = 0;
+    int to_idx = 0;
+    trajectory_point_t from = {0};
+    trajectory_point_t to = base_trajectory[to_idx];
+    result.emplace_back(from);
+    float total_dist = 1;
+    while (true) {
+      while (true) {
+        auto tmp_dist = get_dist_pt(from, to);
+        if (tmp_dist >= chop_dt) {
+          get_next_from_pt(from, to);
+          result.emplace_back(from);
+          break;
+        }
+        to_idx++;
+        if (to_idx >= trj_size - 1)
+          break;
+        to = base_trajectory[to_idx];
+      }
+      if (to_idx >= trj_size)
+        return;
+    }
+  }
+}
+
+float TrajectoryCreator::get_dist_pt(trajectory_point_t &from,
+                                     trajectory_point_t &to) {
+  auto tmp =
+      (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y);
+  if (tmp <= 0)
+    return 0;
+  return sqrt(tmp);
+}
+
+void TrajectoryCreator::get_next_from_pt(trajectory_point_t &from,
+                                         trajectory_point_t &to) {
+  float dx = abs(to.x - from.x);
+  float dy = abs(to.y - from.y);
+  if (dx > dy)
+    get_next_from_pt_x(from, to);
+  else
+    get_next_from_pt_y(from, to);
+  from.type = to.type;
+}
+
+void TrajectoryCreator::get_next_from_pt_x(trajectory_point_t &from,
+                                           trajectory_point_t &to) {
+  // from-toの間の点線の傾き、切片計算
+  float a = 0;
+  if (abs(from.x - to.x) > eps) {
+    a = (to.y - from.y) / (to.x - from.x);
+  }
+  const float b = to.y - a * to.x;
+
+  // fromの中心とした半径rの円のパラメータ
+  const float c = from.x;
+  const float d = from.y;
+  const float f = b - d; // y-c = (ax+b) -d = ax + (b-d)
+  const float r = chop_dt;
+
+  float A = 1 + a * a; //非ゼロ
+  float B = 2 * (a * f - c);
+  float C = (c * c + f * f - r * r);
+  float D = B * B - 4 * A * C;
+
+  // update
+  float next_x = 0;
+  float next_y = 0;
+
+  if (D <= 0 || isnan(D) || isinf(D)) {
+    next_x = (-B / (2 * A));
+  } else {
+    if (from.x < to.x)
+      next_x = (-B + sqrt(D)) / (2 * A);
+    else
+      next_x = (-B - sqrt(D)) / (2 * A);
+  }
+  next_y = a * next_x + b;
+
+  get_next_from_theta_x(from, to, next_x);
+  from.x = next_x;
+  from.y = next_y;
+}
+
+void TrajectoryCreator::get_next_from_pt_y(trajectory_point_t &from,
+                                           trajectory_point_t &to) {
+  // from-toの間の点線の傾き、切片計算
+  float a = 0;
+  if (abs(from.y - to.y) > eps)
+    a = (to.x - from.x) / (to.y - from.y);
+
+  const float b = to.x - a * to.y;
+
+  // fromの中心とした半径rの円のパラメータ
+  const float c = from.x;
+  const float d = from.y;
+  const float f = b - c; // x-c = (ay+b) -c = ay + (b-c)
+  const float r = chop_dt;
+
+  float A = 1 + a * a; //非ゼロ
+  float B = 2 * (a * f - d);
+  float C = (d * d + f * f - r * r);
+  float D = B * B - 4 * A * C;
+
+  // update
+  float next_x = 0;
+  float next_y = 0;
+
+  if (D <= 0 || isnan(D) || isinf(D)) {
+    next_y = (-B / (2 * A));
+  } else {
+    if (from.y < to.y)
+      next_y = (-B + sqrt(D)) / (2 * A);
+    else
+      next_y = (-B - sqrt(D)) / (2 * A);
+  }
+  next_x = a * next_y + b;
+
+  get_next_from_theta_y(from, to, next_y);
+
+  from.x = next_x;
+  from.y = next_y;
+}
+
+void TrajectoryCreator::get_next_from_theta_x(trajectory_point_t &from,
+                                              trajectory_point_t &to,
+                                              float next_x) {
+  float a = 0;
+  if (abs(from.x - to.x) > eps)
+    a = (to.ang - from.ang) / (to.x - from.x);
+
+  const float b = to.ang - a * to.x;
+  from.ang = a * next_x + b;
+}
+void TrajectoryCreator::get_next_from_theta_y(trajectory_point_t &from,
+                                              trajectory_point_t &to,
+                                              float next_y) {
+  float a = 0;
+  if (abs(from.y - to.y) > eps)
+    a = (to.ang - from.ang) / (to.y - from.y);
+
+  const float b = to.ang - a * to.y;
+  from.ang = a * next_y + b;
+}
+void TrajectoryCreator::init() {
+  zipped_trj.normal.clear();
+  zipped_trj.orval.clear();
+  zipped_trj.large.clear();
+  zipped_trj.dia45.clear();
+  zipped_trj.dia45_2.clear();
+  zipped_trj.dia135.clear();
+  zipped_trj.dia135_2.clear();
+  zipped_trj.dia90.clear();
+  make_chopped_trajectory(zipped_trj.normal, 1, false);
+  make_chopped_trajectory(zipped_trj.orval, 3, false);
+  make_chopped_trajectory(zipped_trj.large, 5, false);
+  make_chopped_trajectory(zipped_trj.dia45, 7, false);
+  make_chopped_trajectory(zipped_trj.dia45_2, 7, true);
+  make_chopped_trajectory(zipped_trj.dia135, 9, false);
+  make_chopped_trajectory(zipped_trj.dia135_2, 9, true);
+  make_chopped_trajectory(zipped_trj.dia90, 11, true);
+}
 TrajectoryCreator::TrajectoryCreator(/* args */) {}
 
 TrajectoryCreator::~TrajectoryCreator() {}

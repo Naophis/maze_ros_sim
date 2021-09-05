@@ -22,13 +22,16 @@ private:
   ros::Publisher pub_base_path;
   ros::Publisher pub_trajectory;
   ros::Publisher pub_trajectory_dia;
+  ros::Publisher pub_test_trajectory;
   ros::Subscriber sub_base_path;
   ros::Subscriber sub_base_path_dia;
 
   MarkerArrayPtr trajectory_mk_array;
+  MarkerArrayPtr test_trajectory_mk_array;
 
   MarkerPtr mk_trajectory;
   TrajectoryCreator tc;
+  void make_all_trajectory();
 
 public:
   TrajectorySimulator(/* args */);

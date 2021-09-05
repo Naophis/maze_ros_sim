@@ -11,6 +11,8 @@ using namespace std;
 
 constexpr double ROOT2 = sqrt(2);
 constexpr double dt = 0.001;
+constexpr double chop_dt = 3;
+constexpr double eps = 0.001;
 class TrajectoryCreator {
 private:
   TurnType get_turn_type(int turn_num);
@@ -34,12 +36,26 @@ private:
               bool dia);
   float cell_size = 180;
   float half_cell_size = 90;
+  float get_dist_pt(trajectory_point_t &from, trajectory_point_t &to);
+  void get_next_from_pt(trajectory_point_t &from, trajectory_point_t &to);
+  void get_next_from_pt_x(trajectory_point_t &from, trajectory_point_t &to);
+  void get_next_from_pt_y(trajectory_point_t &from, trajectory_point_t &to);
+
+  void get_next_from_theta_x(trajectory_point_t &from, trajectory_point_t &to,
+                             float next_x);
+  void get_next_from_theta_y(trajectory_point_t &from, trajectory_point_t &to,
+                             float next_y);
+
+  base_trajectory_pattern_t zipped_trj;
 
 public:
   TrajectoryCreator(/* args */);
   ~TrajectoryCreator();
+  void init();
   void exec(path_struct &base_path, vector<trajectory_point_t> &trajectory);
   void exec2(path_struct &base_path, vector<trajectory_point_t> &trajectory);
+  void make_chopped_trajectory(vector<trajectory_point_t> &trajectory,
+                               int turn_num, bool dia);
   slalom_data_t sla_data;
 };
 
