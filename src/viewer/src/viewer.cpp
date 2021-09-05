@@ -166,13 +166,13 @@ void Viewer::create_ego_marker() {
   double y1 = cell_size / 2 + cell_size * ego.y;
   double ang = 0;
   if (ego_dir == 1) {
-    ang = 3.14 / 2;
+    ang = PI / 2;
   } else if (ego_dir == 2) {
     ang = 0;
   } else if (ego_dir == 4) {
-    ang = 3.14;
+    ang = PI;
   } else if (ego_dir == 8) {
-    ang = -3.14 / 2;
+    ang = -PI / 2;
   }
 
   tf::Quaternion quat = tf::createQuaternionFromRPY(0, 0, ang);
@@ -222,16 +222,16 @@ void Viewer::create_ego_marker2() {
   double ang = 0;
 
   if (ego_dir == 1) {
-    ang = 3.14 / 2;
+    ang = PI / 2;
     y1 -= cell_size / 2;
   } else if (ego_dir == 2) {
     ang = 0;
     x1 -= cell_size / 2;
   } else if (ego_dir == 4) {
-    ang = 3.14;
+    ang = PI;
     x1 += cell_size / 2;
   } else if (ego_dir == 8) {
-    ang = -3.14 / 2;
+    ang = -PI / 2;
     y1 += cell_size / 2;
   }
 
@@ -459,7 +459,7 @@ void Viewer::add_wall(int x, int y, int &idx, int dir) {
 
   double x2 = 0;
   double y2 = 0;
-  double ang = 3.1415926535 / 2;
+  double ang = PI / 2;
   if (dir == 0x04) {
     x2 = -cell_size / 2;
   } else if (dir == 0x08) {

@@ -3,9 +3,14 @@
 
 #include "stdio.h"
 #include <vector>
+#include <cmath>
 
 using namespace std;
 constexpr unsigned char MAX_MAZE_SIZE = 32;
+constexpr double ROOT2 = sqrt(2);
+constexpr double dt = 0.001;
+constexpr double eps = 0.001;
+constexpr double PI = 3.141592653589793238;
 
 typedef struct {
   float n;

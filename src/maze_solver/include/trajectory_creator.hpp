@@ -9,9 +9,6 @@
 
 using namespace std;
 
-constexpr double ROOT2 = sqrt(2);
-constexpr double dt = 0.001;
-constexpr double eps = 0.001;
 class TrajectoryCreator {
 private:
   TurnType get_turn_type(int turn_num);

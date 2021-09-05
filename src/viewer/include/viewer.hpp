@@ -21,6 +21,7 @@ using namespace jsk_rviz_plugins;
 constexpr char MAX_LOOP = 5;
 constexpr char MAX_MAZE_SIZE = 32;
 constexpr int TXT_BUF = 256;
+constexpr double PI = 3.141592653589793238;
 
 typedef struct {
   int x;
