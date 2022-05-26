@@ -93,8 +93,6 @@ public:
   unsigned int searchGoalPosition(const bool isSearch,
                                   vector<point_t> &pt_list);
 
-  void searchGoalPosition2(const bool isSearch, vector<point_t> &pt_list);
-
   bool is_unknown(const int x, const int y, Direction dir);
 
   void setNextRootDirectionPathUnKnown(int x, int y, Direction dir,
