@@ -15,25 +15,15 @@ void MazeSolverBaseLgc::init(const int _maze_size, const int _max_step_val) {
   q_list.resize(maze_list_size + 1);
   vq_list.resize(4 * maze_list_size + 1);
   goal_list3.clear();
-  // point_t p;
-  // p.x = maze_size - 1;
-  // p.y = 0;
-  // goal_list3.emplace_back(p);
-  // p.x = maze_size - 1;
-  // p.y = maze_size - 1;
-  // goal_list3.emplace_back(p);
-  // p.x = 0;
-  // p.y = maze_size - 1;
-  // goal_list3.emplace_back(p);
-  // p.x = 0;
-  // p.y = maze_size - 1;
-  // goal_list3.emplace_back(p);
 }
 
 void MazeSolverBaseLgc::set_goal_pos(const vector<point_t> &list) {
   goal_list.clear();
-  for (const auto p : list)
+  goal_list_origin.clear();
+  for (const auto p : list) {
     goal_list.emplace_back(p);
+    goal_list_origin.emplace_back(p);
+  }
 }
 
 void MazeSolverBaseLgc::set_goal_pos2(const vector<point_t> &pt_list) {
@@ -164,6 +154,11 @@ void MazeSolverBaseLgc::update_dist_map(const int mode,
         }
       }
     }
+    if (search_mode) {
+      if (ego->x == X && ego->y == Y) {
+        break;
+      }
+    }
   }
 }
 
@@ -218,6 +213,7 @@ void MazeSolverBaseLgc::set_map_val(const int x, const int y, const int val) {
   if (valid_map_list_idx(x, y))
     map[x + y * maze_size] = val;
 }
+void MazeSolverBaseLgc::set_ego(ego_t *_ego) { ego = _ego; }
 void MazeSolverBaseLgc::set_map_val(int idx, int val) { map[idx] = val; }
 
 void MazeSolverBaseLgc::set_wall_data(const int x, const int y, Direction dir,
@@ -234,13 +230,13 @@ void MazeSolverBaseLgc::set_wall_data(const int x, const int y, Direction dir,
 }
 
 void MazeSolverBaseLgc::set_default_wall_data() {
-  // for (int i = 0; i < maze_size; i++) {
-  //   // set_map
-  //   set_wall_data(i, maze_size - 1, Direction::North, true);
-  //   set_wall_data(maze_size - 1, i, Direction::East, true);
-  //   set_wall_data(0, i, Direction::West, true);
-  //   set_wall_data(i, 0, Direction::South, true);
-  // }
+  for (int i = 0; i < maze_size; i++) {
+    // set_map
+    set_wall_data(i, maze_size - 1, Direction::North, true);
+    set_wall_data(maze_size - 1, i, Direction::East, true);
+    set_wall_data(0, i, Direction::West, true);
+    set_wall_data(i, 0, Direction::South, true);
+  }
   set_wall_data(0, 0, Direction::East, true);
   set_wall_data(0, 0, Direction::North, false);
   set_wall_data(1, 0, Direction::West, true);

@@ -21,13 +21,13 @@ private:
   void setNextDirection2(int x2, int y2, Direction dir, Direction &next_dir,
                          int &val);
   bool goaled = false;
-  bool goal_startpos_lock = false;
   point_t next_goal_pt = {0};
   int limit = 256;
   int limit2 = 25;
 
   // void create_path(path_type &path, Motion motion);
   // void clear_path(path_type &path);
+  vector<point_t>::iterator it;
 
 public:
   Adachi(/* args */);
@@ -37,8 +37,13 @@ public:
   Direction detect_next_direction();
   Motion get_next_motion(Direction next_dir);
   void get_next_pos(Direction next_dir);
-  int exec(path_type &path);
+  // int exec(path_type &path);
+  Motion exec(path_type &path);
+  bool goal_step = false;
+  void clear_goal() { goal_step = false; }
+  bool goal_startpos_lock = false;
   void back_home();
+  void goal_step_check();
   ego_t *ego;
   vector<point_t> pt_list;
   vector<point_t> start_pt_list;

@@ -75,9 +75,16 @@ void MazeSolverCtrl::timer_callback(const ros::TimerEvent &e) {
     update_sensing_result2();
     maze_known = false;
   }
-
-  mz.motion = adachi.exec(path);
+  mz.motion = static_cast<int>(adachi.exec(path));
   Motion next_motion = static_cast<Motion>(mz.motion);
+  if (adachi.goal_step) {
+    adachi.subgoal_list.erase(ego.x + ego.y * lgc.maze_size);
+    {
+      lgc.set_param3();
+      lgc.searchGoalPosition(true, adachi.subgoal_list);
+      adachi.cost_mode = 3;
+    }
+  }
   {
     my_msg::base_path bp;
     my_msg::base_path_element ele;
@@ -131,6 +138,7 @@ void MazeSolverCtrl::init() {
   set_meta_maze_data();
   adachi.set_ego(&ego);
   adachi.set_logic(&lgc);
+  lgc.set_ego(&ego);
   adachi.lgc->set_param3();
 
   lgc.set_default_wall_data();

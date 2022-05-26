@@ -116,6 +116,7 @@ typedef struct {
   float x;
   float y;
   float ang;
+  float base_ang_accl;
   char type;
 } trajectory_point_t;
 

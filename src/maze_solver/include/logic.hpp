@@ -11,6 +11,8 @@ using namespace std;
 
 class MazeSolverBaseLgc {
 public:
+  ego_t *ego;
+  void set_ego(ego_t *_ego);
   MazeSolverBaseLgc();
 
   ~MazeSolverBaseLgc();
@@ -116,6 +118,7 @@ public:
   vector<point_t> search_log;
 
   vector<point_t> goal_list;
+  vector<point_t> goal_list_origin;
   vector<point_t> goal_list2;
   vector<point_t> goal_list3;
 

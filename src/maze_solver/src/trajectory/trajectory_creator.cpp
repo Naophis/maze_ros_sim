@@ -130,7 +130,7 @@ float TrajectoryCreator::get_slalom_etn(TurnType type, bool dia) {
     return !dia ? sla_data.dia135.n : sla_data.dia135_2.n;
   else if (type == TurnType::Dia90)
     return sla_data.dia90.n;
-  // else if (type == TurnType::Kojima)
+  // else if (type == TurnType::Kojima) // Kojimaターンは封印。
   //   return 90;
   return 0;
 }
@@ -598,6 +598,7 @@ void TrajectoryCreator::repaint_slalom(vector<trajectory_point_t> &trajectory,
   for (auto trj : base_trj) {
     if (turn_dir == TurnDirection::Right) {
       tmp_ele.ang = trj_ele.ang + trj.ang;
+      tmp_ele.base_ang_accl = trj.base_ang_accl;
       if (ego.dir == Direction::North) {
         tmp_ele.x = trj_ele.x + trj.x;
         tmp_ele.y = trj_ele.y + trj.y;
@@ -630,6 +631,7 @@ void TrajectoryCreator::repaint_slalom(vector<trajectory_point_t> &trajectory,
 
     } else {
       tmp_ele.ang = trj_ele.ang - trj.ang;
+      tmp_ele.base_ang_accl = -trj.base_ang_accl;
       if (ego.dir == Direction::North) {
         tmp_ele.x = trj_ele.x - trj.x;
         tmp_ele.y = trj_ele.y + trj.y;
@@ -720,6 +722,7 @@ void TrajectoryCreator::run_straight(vector<trajectory_point_t> &trajectory,
     trj_ele.ang = get_run_dir(ego.dir, trj_ele.ang);
   }
   trj_ele.type = type;
+  trj_ele.base_ang_accl = 0;
 
   while (tmp_dist < dist) {
     trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
@@ -755,9 +758,11 @@ void TrajectoryCreator::slalom(vector<trajectory_point_t> &trajectory,
   if (turn_dir == TurnDirection::Left)
     alphaTemp *= -1;
 
+  float base_ang_accl = 0;
   while (abs(tmp_ang) < tgt_ang) {
     if (dt * sinCount / slaTerm < 2.0) {
-      alpha = alphaTemp * Et2(dt * sinCount, slaTerm, etN);
+      base_ang_accl = Et2(dt * sinCount, slaTerm, etN);
+      alpha = alphaTemp * base_ang_accl;
     } else {
       alpha = 0;
       w = 0;
@@ -766,6 +771,7 @@ void TrajectoryCreator::slalom(vector<trajectory_point_t> &trajectory,
     w += alpha * dt;
     tmp_ang += abs(w) * dt;
     trj_ele.ang += w * dt;
+    trj_ele.base_ang_accl = base_ang_accl;
     trj_ele.x = trj_ele.x + v_max * sin(trj_ele.ang) * dt;
     trj_ele.y = trj_ele.y + v_max * cos(trj_ele.ang) * dt;
     trajectory.emplace_back(trj_ele);
@@ -952,22 +958,37 @@ void TrajectoryCreator::get_next_from_pt_y(trajectory_point_t &from,
 void TrajectoryCreator::get_next_from_theta_x(trajectory_point_t &from,
                                               trajectory_point_t &to,
                                               float next_x) {
+  // 角度
   float a = 0;
   if (abs(from.x - to.x) > eps)
     a = (to.ang - from.ang) / (to.x - from.x);
-
-  const float b = to.ang - a * to.x;
+  float b = to.ang - a * to.x;
   from.ang = a * next_x + b;
+
+  // 角加速度（基準）
+  a = 0;
+  if (abs(from.x - to.x) > eps)
+    a = (to.base_ang_accl - from.base_ang_accl) / (to.x - from.x);
+  b = to.base_ang_accl - a * to.x;
+  from.base_ang_accl = a * next_x + b;
 }
+
 void TrajectoryCreator::get_next_from_theta_y(trajectory_point_t &from,
                                               trajectory_point_t &to,
                                               float next_y) {
+  // 角度
   float a = 0;
   if (abs(from.y - to.y) > eps)
     a = (to.ang - from.ang) / (to.y - from.y);
-
-  const float b = to.ang - a * to.y;
+  float b = to.ang - a * to.y;
   from.ang = a * next_y + b;
+
+  // 角加速度（基準）
+  a = 0;
+  if (abs(from.y - to.y) > eps)
+    a = (to.base_ang_accl - from.base_ang_accl) / (to.y - from.y);
+  b = to.base_ang_accl - a * to.y;
+  from.base_ang_accl = a * next_y + b;
 }
 void TrajectoryCreator::init() {
   zipped_trj.normal.clear();
