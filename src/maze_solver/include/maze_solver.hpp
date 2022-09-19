@@ -2,8 +2,8 @@
 #define MAZE_SOLVER_H
 
 #include "stdio.h"
-#include <vector>
 #include <cmath>
+#include <vector>
 
 using namespace std;
 constexpr unsigned char MAX_MAZE_SIZE = 32;
@@ -94,6 +94,12 @@ typedef struct {
   Direction dir;
   float dist2;
 } dir_pt_t;
+
+struct CompairDirPt {
+  bool operator()(dir_pt_t const &p1, dir_pt_t const &p2) {
+    return p1.dist2 > p2.dist2;
+  }
+};
 
 typedef struct {
   unsigned char x;

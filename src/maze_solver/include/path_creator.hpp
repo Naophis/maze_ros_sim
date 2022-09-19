@@ -7,6 +7,7 @@
 
 #include "logic.hpp"
 #include "maze_solver.hpp"
+#include <queue>
 
 using namespace std;
 
@@ -57,6 +58,7 @@ public:
   void path_reflash();
   void convert_large_path(bool b1);
   void diagonalPath(bool isFull, bool a1);
+  float drawChangePathRoot(char goalX, char goalY, char isFull);
 };
 
 #endif

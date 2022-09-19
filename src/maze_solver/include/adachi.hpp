@@ -20,7 +20,7 @@ private:
                         int &val);
   void setNextDirection2(int x2, int y2, Direction dir, Direction &next_dir,
                          int &val);
-  bool goaled = false;
+
   point_t next_goal_pt = {0};
   int limit = 256;
   int limit2 = 25;
@@ -54,6 +54,8 @@ public:
   MazeSolverBaseLgc *lgc;
   int cost_mode = 0;
   unordered_map<unsigned int, unsigned char> subgoal_list;
+  bool force_known = false;
+  bool goaled = false;
 };
 
 #endif

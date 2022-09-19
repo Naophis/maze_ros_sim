@@ -559,3 +559,453 @@ void PathCreator::pathOffset() {
     i++;
   }
 }
+
+// float PathCreator::drawChangePathRoot(char goalX, char goalY, char isFull) {
+//   float pathVariation[4];
+//   unsigned char check = 0;
+//   unsigned char x = 0;
+//   unsigned char y = 0;
+//   unsigned char checkPoint[4];
+//   unsigned char temp = 255;
+//   unsigned char i = 0;
+//   unsigned char j = 0;
+//   unsigned char k = 0;
+//   unsigned char turnVariety[4][2];
+//   unsigned char Priority = 1;
+//   unsigned char p = 0;
+//   unsigned char q = 0;
+//   unsigned char checkker = 0;
+//   unsigned int turnLisk[4];
+//   int tempLisk = 0;
+
+//   // deadEnd(goalX, goalY);
+//   //	updateVectorMap(goalX, goalY, false, isFull);
+//   vectorDistUpdate(goalX, goalY, isFull);
+//   for (i = 0; checkQ[i] != 0; i++) {
+//     pathVariation[0] = 255;
+//     pathVariation[1] = 255;
+//     pathVariation[2] = 255;
+//     pathVariation[3] = 255;
+//     checkPoint[0] = 0;
+//     checkPoint[1] = 0;
+//     checkPoint[2] = 0;
+//     checkPoint[3] = 0;
+//     turnLisk[0] = 255;
+//     turnLisk[1] = 255;
+//     turnLisk[2] = 255;
+//     turnLisk[3] = 255;
+//     x = (checkQ[i] / 16);
+//     y = checkQ[i] & 0x0f;
+//     if (checkMap[x][y] != 0 && (checkMap[x][y] & 0xf0) == 0) {
+//       if ((checkMap[x][y] & 0x01) == 0x01) {
+//         pathVariation[0] = pathCreateChange(goalX, goalY, x, y, North);
+//         // myprintf("north(%d,%d) %f\r\n", x, y, pathVariation[0]);
+//         if (checkTurningPoint) {
+//           checkPoint[0] = North;
+//         }
+//         if (pathVariation[0] != 255) {
+//           turnLisk[0] = countTurnLisk();
+//           for (k = 0; path_t[k] != 255; k++) {
+//             if (path_t[k] < 7) {
+//               turnVariety[0][0] += 1;
+//             } else {
+//               turnVariety[0][1] += 1;
+//             }
+//           }
+//         }
+//       }
+//       if ((checkMap[x][y] & 0x02) == 0x02) {
+//         pathVariation[1] = pathCreateChange(goalX, goalY, x, y, East);
+//         // myprintf("east(%d,%d) %f\r\n", x, y, pathVariation[1]);
+//         if (checkTurningPoint) {
+//           checkPoint[0] = East;
+//         }
+//         if (pathVariation[1] != 255) {
+//           turnLisk[1] = countTurnLisk();
+//           for (k = 0; path_t[k] != 255; k++) {
+//             if (path_t[k] < 7) {
+//               turnVariety[1][0] += 1;
+//             } else {
+//               turnVariety[1][1] += 1;
+//             }
+//           }
+//         }
+//       }
+//       if ((checkMap[x][y] & 0x04) == 0x04) {
+//         pathVariation[2] = pathCreateChange(goalX, goalY, x, y, West);
+//         // myprintf("west(%d,%d) %f\r\n", x, y, pathVariation[2]);
+//         if (checkTurningPoint) {
+//           checkPoint[0] = West;
+//         }
+//         if (pathVariation[2] != 255) {
+//           turnLisk[2] = countTurnLisk();
+//           for (k = 0; path_t[k] != 255; k++) {
+//             if (path_t[k] < 7) {
+//               turnVariety[2][0] += 1;
+//             } else {
+//               turnVariety[2][1] += 1;
+//             }
+//           }
+//         }
+//       }
+//       if ((checkMap[x][y] & 0x08) == 0x08) {
+//         pathVariation[3] = pathCreateChange(goalX, goalY, x, y, South);
+//         // myprintf("south(%d,%d) %f\r\n", x, y, pathVariation[3]);
+//         if (checkTurningPoint) {
+//           checkPoint[0] = South;
+//         }
+//         if (pathVariation[3] != 255) {
+//           turnLisk[3] = countTurnLisk();
+//           for (k = 0; path_t[k] != 255; k++) {
+//             if (path_t[k] < 7) {
+//               turnVariety[3][0] += 1;
+//             } else {
+//               turnVariety[3][1] += 1;
+//             }
+//           }
+//         }
+//       }
+//       temp = 255;
+//       tempLisk = 0;
+//       //			myprintf("%f	%f	%f	%f\r\n",
+//       //pathVariation[0], pathVariation[1], 					pathVariation[2], pathVariation[3]);
+//       for (j = 0; j < 4; j++) {
+//         if (pathVariation[j] < temp) {
+//           temp = pathVariation[j];
+//           if (j == 0) {
+//             check = 1;
+//           } else if (j == 1) {
+//             check = 2;
+//           } else if (j == 2) {
+//             check = 4;
+//           } else if (j == 3) {
+//             check = 8;
+//           }
+//         } else if (pathVariation[j] != 255 && pathVariation[j] == temp) {
+//           if (tempLisk < turnLisk[j]) {
+//             temp = pathVariation[j];
+//             tempLisk = turnLisk[j];
+//             if (j == 0) {
+//               check = 1;
+//             } else if (j == 1) {
+//               check = 2;
+//             } else if (j == 2) {
+//               check = 4;
+//             } else if (j == 3) {
+//               check = 8;
+//             }
+//           }
+//         }
+//       }
+//       //			myprintf("check=%d", check);
+//       if (Priority == 1) {
+//         if (pathVariation[0] == pathVariation[1] && pathVariation[0] != 255) {
+//           if (turnVariety[0][1] > turnVariety[1][1]) {
+//             check = 1;
+//           } else if (turnVariety[0][1] < turnVariety[1][1]) {
+//             check = 2;
+//           }
+//         } else if (pathVariation[1] == pathVariation[2] &&
+//                    pathVariation[1] != 255) {
+//           if (turnVariety[1][1] > turnVariety[2][1]) {
+//             check = 2;
+//           } else if (turnVariety[1][1] < turnVariety[2][1]) {
+//             check = 4;
+//           }
+//         } else if (pathVariation[2] == pathVariation[3] &&
+//                    pathVariation[2] != 255) {
+//           if (turnVariety[2][1] > turnVariety[3][1]) {
+//             check = 4;
+//           } else if (turnVariety[2][1] < turnVariety[3][1]) {
+//             check = 8;
+//           }
+//         } else if (pathVariation[3] == pathVariation[0] &&
+//                    pathVariation[3] != 255) {
+//           if (turnVariety[0][1] > turnVariety[3][1]) {
+//             check = 1;
+//           } else if (turnVariety[0][1] < turnVariety[3][1]) {
+//             check = 8;
+//           }
+//         } else if (pathVariation[3] == pathVariation[1] &&
+//                    pathVariation[1] != 255) {
+//           if (turnVariety[1][1] > turnVariety[3][1]) {
+//             check = 2;
+//           } else if (turnVariety[1][1] < turnVariety[3][1]) {
+//             check = 8;
+//           }
+//         } else if (pathVariation[0] == pathVariation[2] &&
+//                    pathVariation[2] != 255) {
+//           if (turnVariety[0][1] > turnVariety[2][1]) {
+//             check = 1;
+//           } else if (turnVariety[0][1] < turnVariety[2][1]) {
+//             check = 4;
+//           }
+//         }
+//       } else {
+//         if (pathVariation[0] == pathVariation[1] && pathVariation[0] != 255) {
+//           if (turnVariety[0][1] < turnVariety[1][1]) {
+//             check = 1;
+//           } else if (turnVariety[0][1] > turnVariety[1][1]) {
+//             check = 2;
+//           }
+//         } else if (pathVariation[1] == pathVariation[2] &&
+//                    pathVariation[1] != 255) {
+//           if (turnVariety[1][1] < turnVariety[2][1]) {
+//             check = 2;
+//           } else if (turnVariety[1][1] > turnVariety[2][1]) {
+//             check = 4;
+//           }
+//         } else if (pathVariation[2] == pathVariation[3] &&
+//                    pathVariation[2] != 255) {
+//           if (turnVariety[2][1] < turnVariety[3][1]) {
+//             check = 4;
+//           } else if (turnVariety[2][1] > turnVariety[3][1]) {
+//             check = 8;
+//           }
+//         } else if (pathVariation[3] == pathVariation[0] &&
+//                    pathVariation[3] != 255) {
+//           if (turnVariety[0][1] < turnVariety[3][1]) {
+//             check = 1;
+//           } else if (turnVariety[0][1] > turnVariety[3][1]) {
+//             check = 8;
+//           }
+//         } else if (pathVariation[3] == pathVariation[1] &&
+//                    pathVariation[1] != 255) {
+//           if (turnVariety[1][1] < turnVariety[3][1]) {
+//             check = 2;
+//           } else if (turnVariety[1][1] > turnVariety[3][1]) {
+//             check = 8;
+//           }
+//         } else if (pathVariation[0] == pathVariation[2] &&
+//                    pathVariation[2] != 255) {
+//           if (turnVariety[0][1] < turnVariety[2][1]) {
+//             check = 1;
+//           } else if (turnVariety[0][1] > turnVariety[2][1]) {
+//             check = 4;
+//           }
+//         }
+//       }
+//       //			myprintf("check=%d", check);
+//       if ((checkPoint[0] == 0 && checkPoint[1] == 0 && checkPoint[2] == 0 &&
+//            checkPoint[3] == 0) ||
+//           check == 0) {
+//         deleteQ(x, y);
+//         if (!checkDualCheck(x, y)) {
+//           addQ(x, y);
+//         }
+//         i -= 1;
+//       } else {
+//         checkker = (check << 4) | (checkMap[x][y] & 0x0f);
+//         checkMap[x][y] = checkker;
+//       }
+//       for (p = 0; p < 4; p++) {
+//         for (q = 0; q < 2; q++) {
+//           turnVariety[p][q] = 0;
+//         }
+//       }
+//     }
+//   }
+//   for (i = 0; checkQ[i] != 0; i++) {
+//     pathVariation[0] = 255;
+//     pathVariation[1] = 255;
+//     pathVariation[2] = 255;
+//     pathVariation[3] = 255;
+//     checkPoint[0] = 0;
+//     checkPoint[1] = 0;
+//     checkPoint[2] = 0;
+//     checkPoint[3] = 0;
+//     x = (checkQ[i] / 16);
+//     y = checkQ[i] & 0x0f;
+//     if ((checkMap[x][y] & 0x01) == 0x01) {
+//       pathVariation[0] = pathCreateChange(goalX, goalY, x, y, North);
+//       if (checkPoint) {
+//         checkPoint[0] = North;
+//       }
+//       if (pathVariation[0] != 255) {
+//         for (k = 0; path_t[k] != 255; k++) {
+//           if (path_t[k] < 7) {
+//             turnVariety[0][0] += 1;
+//           } else {
+//             turnVariety[0][1] += 1;
+//           }
+//         }
+//       }
+//     }
+//     if ((checkMap[x][y] & 0x02) == 0x02) {
+//       pathVariation[1] = pathCreateChange(goalX, goalY, x, y, East);
+//       if (checkPoint) {
+//         checkPoint[0] = East;
+//       }
+//       if (pathVariation[1] != 255) {
+//         for (k = 0; path_t[k] != 255; k++) {
+//           if (path_t[k] < 7) {
+//             turnVariety[1][0] += 1;
+//           } else {
+//             turnVariety[1][1] += 1;
+//           }
+//         }
+//       }
+//     }
+//     if ((checkMap[x][y] & 0x04) == 0x04) {
+//       pathVariation[2] = pathCreateChange(goalX, goalY, x, y, West);
+//       if (checkPoint) {
+//         checkPoint[0] = West;
+//       }
+//       if (pathVariation[2] != 255) {
+//         for (k = 0; path_t[k] != 255; k++) {
+//           if (path_t[k] < 7) {
+//             turnVariety[2][0] += 1;
+//           } else {
+//             turnVariety[2][1] += 1;
+//           }
+//         }
+//       }
+//     }
+//     if ((checkMap[x][y] & 0x08) == 0x08) {
+//       pathVariation[3] = pathCreateChange(goalX, goalY, x, y, South);
+//       if (checkPoint) {
+//         checkPoint[0] = South;
+//       }
+//       if (pathVariation[3] != 255) {
+//         for (k = 0; path_t[k] != 255; k++) {
+//           if (path_t[k] < 7) {
+//             turnVariety[3][0] += 1;
+//           } else {
+//             turnVariety[3][1] += 1;
+//           }
+//         }
+//       }
+//     }
+//     //		myprintf("%f	%f	%f	%f\r\n", pathVariation[0],
+//     //pathVariation[1], 				pathVariation[2], pathVariation[3]);
+//     temp = 255;
+//     tempLisk = 0;
+//     for (j = 0; j < 4; j++) {
+//       if (pathVariation[j] < temp) {
+//         temp = pathVariation[j];
+//         if (j == 0) {
+//           check = 1;
+//         } else if (j == 1) {
+//           check = 2;
+//         } else if (j == 2) {
+//           check = 4;
+//         } else if (j == 3) {
+//           check = 8;
+//         }
+//         //			} else if (pathVariation[j] != 255 &&
+//         //pathVariation[j] == temp) { 				if (tempLisk < turnLisk[j]) { 					temp =
+//         //pathVariation[j]; 					tempLisk = turnLisk[j]; 					if (j == 0) { 						check = 1; 					}
+//         //else if (j == 1) { 						check = 2; 					} else if (j == 2) { 						check = 4; 					} else
+//         //if (j == 3) { 						check = 8;
+//         //					}
+//         //				}
+//       }
+//     }
+//     //		myprintf("check=%d", check);
+//     if (Priority == 1) {
+//       if (pathVariation[0] == pathVariation[1] && pathVariation[0] != 255) {
+//         if (turnVariety[0][1] > turnVariety[1][1]) {
+//           check = 1;
+//         } else if (turnVariety[0][1] < turnVariety[1][1]) {
+//           check = 2;
+//         }
+//       } else if (pathVariation[1] == pathVariation[2] &&
+//                  pathVariation[1] != 255) {
+//         if (turnVariety[1][1] > turnVariety[2][1]) {
+//           check = 2;
+//         } else if (turnVariety[1][1] < turnVariety[2][1]) {
+//           check = 4;
+//         }
+//       } else if (pathVariation[2] == pathVariation[3] &&
+//                  pathVariation[2] != 255) {
+//         if (turnVariety[2][1] > turnVariety[3][1]) {
+//           check = 4;
+//         } else if (turnVariety[2][1] < turnVariety[3][1]) {
+//           check = 8;
+//         }
+//       } else if (pathVariation[3] == pathVariation[0] &&
+//                  pathVariation[3] != 255) {
+//         if (turnVariety[0][1] > turnVariety[3][1]) {
+//           check = 1;
+//         } else if (turnVariety[0][1] < turnVariety[3][1]) {
+//           check = 8;
+//         }
+//       } else if (pathVariation[3] == pathVariation[1] &&
+//                  pathVariation[1] != 255) {
+//         if (turnVariety[1][1] > turnVariety[3][1]) {
+//           check = 2;
+//         } else if (turnVariety[1][1] < turnVariety[3][1]) {
+//           check = 8;
+//         }
+//       } else if (pathVariation[0] == pathVariation[2] &&
+//                  pathVariation[2] != 255) {
+//         if (turnVariety[0][1] > turnVariety[2][1]) {
+//           check = 1;
+//         } else if (turnVariety[0][1] < turnVariety[2][1]) {
+//           check = 4;
+//         }
+//       }
+//     } else {
+//       if (pathVariation[0] == pathVariation[1] && pathVariation[0] != 255) {
+//         if (turnVariety[0][1] < turnVariety[1][1]) {
+//           check = 1;
+//         } else if (turnVariety[0][1] > turnVariety[1][1]) {
+//           check = 2;
+//         }
+//       } else if (pathVariation[1] == pathVariation[2] &&
+//                  pathVariation[1] != 255) {
+//         if (turnVariety[1][1] < turnVariety[2][1]) {
+//           check = 2;
+//         } else if (turnVariety[1][1] > turnVariety[2][1]) {
+//           check = 4;
+//         }
+//       } else if (pathVariation[2] == pathVariation[3] &&
+//                  pathVariation[2] != 255) {
+//         if (turnVariety[2][1] < turnVariety[3][1]) {
+//           check = 4;
+//         } else if (turnVariety[2][1] > turnVariety[3][1]) {
+//           check = 8;
+//         }
+//       } else if (pathVariation[3] == pathVariation[0] &&
+//                  pathVariation[3] != 255) {
+//         if (turnVariety[0][1] < turnVariety[3][1]) {
+//           check = 1;
+//         } else if (turnVariety[0][1] > turnVariety[3][1]) {
+//           check = 8;
+//         }
+//       } else if (pathVariation[3] == pathVariation[1] &&
+//                  pathVariation[1] != 255) {
+//         if (turnVariety[1][1] < turnVariety[3][1]) {
+//           check = 2;
+//         } else if (turnVariety[1][1] > turnVariety[3][1]) {
+//           check = 8;
+//         }
+//       } else if (pathVariation[0] == pathVariation[2] &&
+//                  pathVariation[2] != 255) {
+//         if (turnVariety[0][1] < turnVariety[2][1]) {
+//           check = 1;
+//         } else if (turnVariety[0][1] > turnVariety[2][1]) {
+//           check = 4;
+//         }
+//       }
+//     }
+//     if (checkPoint[0] == 0 && checkPoint[1] == 0 && checkPoint[2] == 0 &&
+//         checkPoint[3] == 0) {
+//       deleteQ(x, y);
+//       if (!checkDualCheck(x, y)) {
+//         addQ(x, y);
+//       }
+//       i -= 1;
+//     } else {
+//       int checkker = (check << 4) | (checkMap[x][y] & 0x0f);
+//       checkMap[x][y] = checkker;
+//       //			myprintf("(%2x,%2x)=%2x\r\n", x, y, checkker);
+//     }
+//     for (p = 0; p < 4; p++) {
+//       for (q = 0; q < 2; q++) {
+//         turnVariety[p][q] = 0;
+//       }
+//     }
+//   }
+//   return pathCreateChange(goalX, goalY, 0, 0, 1);
+// }

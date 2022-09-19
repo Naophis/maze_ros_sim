@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "maze_solver.hpp"
+#include <queue>
 #include <unordered_map>
-
 using namespace std;
 
 class MazeSolverBaseLgc {
@@ -160,7 +160,6 @@ public:
     // St2 = cell_size / 2;
     // St3 = cell_size / 4;
 
-
     cell_size = 7;
     Dia = cell_size * 1.41421356 / 2;
     Dia2 = cell_size * 1.41421356 / 2 * 3 / 5;
@@ -184,13 +183,13 @@ public:
   }
   void priorityStraight2(int x, int y, Direction now_dir, Direction dir,
                          float &dist_val, Direction &next_dir);
-
+  std::vector<dir_pt_t> memo_q;
 private:
   vector<unsigned char> map;
   vector<unsigned int> dist;
   vector<unsigned char> updateMap;
   vector<point_t> q_list;
-  vector<dir_pt_t> vq_list;
+  priority_queue<dir_pt_t, vector<dir_pt_t>, CompairDirPt> vq_list;
 
   unsigned int maze_list_size;
   unsigned int goal_list_size;
@@ -226,6 +225,7 @@ private:
   float St1 = cell_size;
   float St2 = cell_size * 2 / 7;
   float St3 = cell_size * 1 / 7;
+  dir_pt_t dir_pt;
 };
 
 #endif

@@ -293,7 +293,10 @@ void Viewer::create_maze_info2(double x, double y, int &id, int dir) {
   if ((map[xx][yy] & 0xf0) == 0x00) {
     return;
   }
-
+  const auto start_val = mz.dia_dist_n[0];
+  if (val > start_val) {
+    // return;
+  }
   tf::Quaternion quat = tf::createQuaternionFromRPY(0, 0, 0);
   Marker mk;
   mk.id = id++;

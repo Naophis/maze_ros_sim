@@ -62,6 +62,20 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
       break;
   }
   pub_base_path_dia.publish(bp);
+  my_msg::dist_map cell;
+  my_msg::dist_map_q q;
+  q.size = 0;
+  const auto start = pc.lgc->get_diadist_n_val(0, 0);
+  ROS_WARN("%f", start);
+  for (const auto c : pc.lgc->memo_q) {
+    cell.x = c.x;
+    cell.y = c.y;
+    cell.dir = static_cast<int>(c.dir);
+    cell.dist = c.dist2;
+    q.cell_list.emplace_back(cell);
+    q.size++;
+  }
+  pub_dist_map_q.publish(q);
 }
 
 void PathController::set_meta_data() {
@@ -95,6 +109,7 @@ void PathController::init() {
   pub_path = _nh.advertise<my_msg::path>("/path_info", 1);
   pub_path_dia = _nh.advertise<my_msg::path>("/path_info_dia", 1);
   pub_base_path_dia = _nh.advertise<my_msg::base_path>("/base_path_dia", 1);
+  pub_dist_map_q = _nh.advertise<my_msg::dist_map_q>("/dist_map_q", 1);
 }
 
 int main(int argc, char **argv) {

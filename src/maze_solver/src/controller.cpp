@@ -73,9 +73,16 @@ void MazeSolverCtrl::timer_callback(const ros::TimerEvent &e) {
 
   if (maze_known) {
     update_sensing_result2();
-    maze_known = false;
   }
-  mz.motion = static_cast<int>(adachi.exec(path));
+  if (maze_known) {
+    while (!(adachi.ego->x == 0 && adachi.ego->y == 0)) {
+      mz.motion = static_cast<int>(adachi.exec(path));
+    }
+  } else {
+    mz.motion = static_cast<int>(adachi.exec(path));
+  }
+  maze_known = false;
+
   Motion next_motion = static_cast<Motion>(mz.motion);
   if (adachi.goal_step) {
     adachi.subgoal_list.erase(ego.x + ego.y * lgc.maze_size);

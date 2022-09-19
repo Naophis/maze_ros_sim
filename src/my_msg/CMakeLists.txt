@@ -12,6 +12,8 @@ add_message_files(
   ego.msg
   base_path_element.msg
   base_path.msg
+  dist_map.msg
+  dist_map_q.msg
   path.msg
 )
 generate_messages(

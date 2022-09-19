@@ -87,6 +87,7 @@ bool Adachi::is_goal(int x, int y) {
 }
 
 void Adachi::deadEnd(int egox, int egoy) {
+  // return;
   bool head = true;
   while (head) {
     head = false;
