@@ -14,6 +14,8 @@ add_message_files(
   base_path.msg
   dist_map.msg
   dist_map_q.msg
+  candidate_cell_set.msg
+  candidate_route_map.msg
   path.msg
 )
 generate_messages(

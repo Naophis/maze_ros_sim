@@ -9,6 +9,7 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 
+#include "my_msg/candidate_route_map.h"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_ros/transform_broadcaster.h>
@@ -51,6 +52,7 @@ public:
 
   void maze_callback(const my_msg::mazeConstPtr &_mz);
   void path_callback(const my_msg::pathConstPtr &_path);
+  void candimap_callback(const my_msg::candidate_route_mapConstPtr &_path);
 
   void set_data();
 
@@ -64,6 +66,7 @@ private:
   MarkerArrayPtr maze_info_list[MAX_LOOP];
   MarkerArrayPtr maze_diainfo_list[MAX_LOOP];
   MarkerArrayPtr ego_marker_list[MAX_LOOP];
+  MarkerArrayPtr candidate_map_list[MAX_LOOP];
   tf2_ros::TransformBroadcaster dynamic_br_;
 
   MarkerPtr path_array_list[MAX_LOOP];
@@ -80,13 +83,19 @@ private:
   ros::Publisher pub_maze_diainfo;
   ros::Publisher pub_ego_marker;
   ros::Publisher pub_path_marker;
+  ros::Publisher pub_candi_map;
   char buf[TXT_BUF];
   ros::Subscriber sub_maze;
   ros::Subscriber sub_path;
+  ros::Subscriber sub_candidate_map;
+
   my_msg::maze mz;
   my_msg::path ph;
+  my_msg::candidate_route_map candi_map;
+
   bool initflag = false;
   bool initflag2 = false;
+  bool initflag3 = false;
   point_t ego;
   int ego_dir;
 };

@@ -26,25 +26,41 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
   } else if (mz->cost_mode == 5) {
     pc.lgc->set_param5();
   }
+  pc.other_route_map.clear();
   pc.path_create(mz->motion != 0);
-  my_msg::path path;
-  for (const auto p : pc.path_s) {
-    path.path_s.emplace_back(p);
-  }
-  for (const auto p : pc.path_t) {
-    path.path_t.emplace_back(p);
-  }
-  pub_path.publish(path);
-
   pc.convert_large_path(true);
   pc.diagonalPath(false, true);
+  pc.path_s2.clear();
+  pc.path_t2.clear();
+  for (int i = 0; i < pc.path_t.size(); i++) {
+    pc.path_s2.push_back(pc.path_s[i]);
+    pc.path_t2.push_back(pc.path_t[i]);
+  }
+  pc.drawChangePathRoot(mz->motion != 0);
+
+  // my_msg::path path;
+  // for (const auto p : pc.path_s) {
+  //   path.path_s.emplace_back(p);
+  // }
+  // for (const auto p : pc.path_t) {
+  //   path.path_t.emplace_back(p);
+  // }
+  // pub_path.publish(path);
+
+  //  pc.convert_large_path(true);
+  //  pc.diagonalPath(false, true);
 
   my_msg::path path2;
-  int size = pc.path_s.size();
+  int size = pc.path_s2.size();
+    path2.path_s.clear();
+    path2.path_t.clear();
   for (int i = 0; i < size; i++) {
-    path2.path_s.emplace_back(pc.path_s[i]);
-    path2.path_t.emplace_back(pc.path_t[i]);
-    if (pc.path_t[i] == 255)
+    path2.path_s.push_back(pc.path_s2[i]);
+    path2.path_t.push_back(pc.path_t2[i]);
+    if(pc.path_t2[i]==2 || pc.path_t2[i]==1){
+        ROS_WARN("check");
+    }
+    if (pc.path_t2[i] == 255)
       break;
   }
   pub_path_dia.publish(path2);
@@ -54,11 +70,11 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
   bp.paths.clear();
   bp.size = 0;
   for (int i = 0; i < size; i++) {
-    ele.s = pc.path_s[i];
-    ele.t = pc.path_t[i];
+    ele.s = pc.path_s2[i];
+    ele.t = pc.path_t2[i];
     bp.paths.emplace_back(ele);
     bp.size = i + 1;
-    if (pc.path_t[i] == 255)
+    if (pc.path_t2[i] == 255)
       break;
   }
   pub_base_path_dia.publish(bp);
@@ -66,7 +82,7 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
   my_msg::dist_map_q q;
   q.size = 0;
   const auto start = pc.lgc->get_diadist_n_val(0, 0);
-  ROS_WARN("%f", start);
+  ROS_WARN("other_route_map_size = %d", pc.other_route_map.size());
   for (const auto c : pc.lgc->memo_q) {
     cell.x = c.x;
     cell.y = c.y;
@@ -76,6 +92,18 @@ void PathController::maze_callback(const my_msg::mazeConstPtr &mz) {
     q.size++;
   }
   pub_dist_map_q.publish(q);
+
+  my_msg::candidate_route_map cand_map;
+  for (const auto cand : pc.other_route_map) {
+    my_msg::candidate_cell_set cand_set;
+    for (const auto dir : cand.second.candidate_dir_set) {
+      cand_set.dir.emplace_back(static_cast<int>(dir));
+    }
+    cand_set.x = cand.second.x;
+    cand_set.y = cand.second.y;
+    cand_map.map.emplace_back(cand_set);
+  }
+  pub_candidate_map.publish(cand_map);
 }
 
 void PathController::set_meta_data() {
@@ -110,6 +138,8 @@ void PathController::init() {
   pub_path_dia = _nh.advertise<my_msg::path>("/path_info_dia", 1);
   pub_base_path_dia = _nh.advertise<my_msg::base_path>("/base_path_dia", 1);
   pub_dist_map_q = _nh.advertise<my_msg::dist_map_q>("/dist_map_q", 1);
+  pub_candidate_map =
+      _nh.advertise<my_msg::candidate_route_map>("/candidate_route_map", 1);
 }
 
 int main(int argc, char **argv) {

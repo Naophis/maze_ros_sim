@@ -6,10 +6,13 @@
 #include "maze_solver.hpp"
 #include "my_msg/base_path.h"
 #include "my_msg/base_path_element.h"
-#include "my_msg/maze.h"
-#include "my_msg/path.h"
 #include "my_msg/dist_map.h"
 #include "my_msg/dist_map_q.h"
+#include "my_msg/maze.h"
+#include "my_msg/path.h"
+
+#include "my_msg/candidate_cell_set.h"
+#include "my_msg/candidate_route_map.h"
 
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -30,6 +33,7 @@ private:
   ros::Publisher pub_path_dia;
   ros::Publisher pub_base_path_dia;
   ros::Publisher pub_dist_map_q;
+  ros::Publisher pub_candidate_map;
   ros::Subscriber sub_maze;
 
   PathCreator pc;

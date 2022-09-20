@@ -108,35 +108,6 @@ void PathCreator::addCheckQ(int x, int y) {
     }
   }
 }
-void PathCreator::checkOtherRoot(int x, int y, float now, Direction now_dir) {
-  // int temp = 0;
-  // float a[4];
-  // int index = 0;
-  // for (const auto d : direction_list) {
-  //   float dist = lgc->getDistVector(x, y, d);
-  //   if ((static_cast<int>(now_dir) * static_cast<int>(d)) != 8 &&
-  //       !lgc->existWall(x, y, d) && dist < now) {
-  //     temp += d;
-  //     a[index] = dist;
-  //     index++;
-  //   }
-  // }
-  // float ch = a[0];
-  // for (int i = 0; i < 4; i++)
-  //   if (a[i] == 0)
-  //     continue;
-  //   else if (a[i] != ch)
-  //     ch = a[i];
-
-  // if (temp == 0)
-  //   return;
-
-  // if ((temp == 0x01) || (temp == 0x02) || (temp == 0x04) || (temp == 0x08)) {
-  // } else {
-  //   checkMap[x][y] = temp;
-  //   addCheckQ(x, y);
-  // }
-}
 
 void PathCreator::priorityStraight2(int x, int y, Direction now_dir,
                                     Direction dir, float &dist_val,
@@ -156,13 +127,18 @@ void PathCreator::clearCheckMap() {
   //   for (char j = 0; j < 16; j++)
   //     checkMap[i][j] = 0;
 }
-void PathCreator::path_create(bool is_search) {
+
+bool PathCreator::path_create(bool is_search) {
+  bool use;
+  return path_create(is_search, 0, 0, Direction::Null, use);
+}
+
+bool PathCreator::path_create(bool is_search, int tgt_x, int tgt_y,
+                              Direction tgt_dir, bool &use) {
   Direction next_dir = Direction::North;
   Direction now_dir = next_dir;
   unsigned int idx = 0;
   Direction dirLog[3];
-  bool b1 = false;
-  bool b2 = false;
 
   int x = 0;
   int y = 1;
@@ -172,24 +148,39 @@ void PathCreator::path_create(bool is_search) {
   lgc->updateVectorMap(is_search);
 
   path_s.emplace_back(3);
-  float dist_val;
+  float dist_val = MAX;
+  float old_dist_val = MAX;
+  unordered_map<int, int> stepped;
   while (true) {
+    float old_dist_val = dist_val;
     now_dir = next_dir;
     dirLog[2] = dirLog[1];
     dirLog[1] = dirLog[0];
     dirLog[0] = now_dir;
-
-    dist_val = MAX;
     next_dir = Direction::Undefined;
+
+    if (stepped.count(x + lgc->maze_size * y) != 0) {
+      return false;
+    }
+    stepped[x + lgc->maze_size * y] = 1;
 
     if (lgc->arrival_goal_position(x, y)) {
       add_path_s(idx, 3);
       path_t.emplace_back(255);
       // path_t.emplace_back(0);
       path_size = idx;
-      return;
+      return true;
     }
-    const float position = lgc->getDistVector(x, y, now_dir);
+    float position = lgc->VectorMax;
+    if (now_dir == Direction::North) {
+      position = lgc->getDistVector(x, y, Direction::South);
+    } else if (now_dir == Direction::East) {
+      position = lgc->getDistVector(x, y, Direction::West);
+    } else if (now_dir == Direction::West) {
+      position = lgc->getDistVector(x, y, Direction::East);
+    } else if (now_dir == Direction::South) {
+      position = lgc->getDistVector(x, y, Direction::North);
+    }
 
     setNextRootDirectionPath(x, y, now_dir, Direction::North, dist_val,
                              next_dir);
@@ -199,13 +190,32 @@ void PathCreator::path_create(bool is_search) {
                              next_dir);
     setNextRootDirectionPath(x, y, now_dir, Direction::South, dist_val,
                              next_dir);
+    if (dist_val == old_dist_val) {
+      break;
+    }
     if (dirLog[0] == dirLog[1] || dirLog[0] != dirLog[2])
       priorityStraight2(x, y, now_dir, dirLog[0], dist_val, next_dir);
     else
       priorityStraight2(x, y, now_dir, dirLog[1], dist_val, next_dir);
 
-    Motion nextMotion = get_next_motion(now_dir, next_dir);
+    if (tgt_dir != Direction::Null) {
+      if (x == tgt_x && y == tgt_y) {
+        next_dir = tgt_dir;
 
+        dist_val = lgc->getDistV(x, y, next_dir);
+        use = true;
+      }
+      if (other_route_map.count(x + lgc->maze_size * y) != 0) {
+        //ルート決定してたら強制設定
+        if (other_route_map[x + lgc->maze_size * y].selected) {
+          next_dir = other_route_map[x + lgc->maze_size * y].select_dir;
+          dist_val = lgc->getDistV(x, y, next_dir);
+        }
+      }
+    }
+
+    Motion nextMotion = get_next_motion(now_dir, next_dir);
+    checkOtherRoot(x, y, now_dir, position);
     if (nextMotion == Motion::Straight) {
       add_path_s(idx, 2);
     } else if (nextMotion == Motion::TurnRight) {
@@ -223,6 +233,7 @@ void PathCreator::path_create(bool is_search) {
     next_dir = get_next_pos(x, y, now_dir, next_dir);
   }
   path_size = idx;
+  return false;
 }
 
 void PathCreator::convert_large_path(bool b1) {
@@ -560,452 +571,303 @@ void PathCreator::pathOffset() {
   }
 }
 
-// float PathCreator::drawChangePathRoot(char goalX, char goalY, char isFull) {
-//   float pathVariation[4];
-//   unsigned char check = 0;
-//   unsigned char x = 0;
-//   unsigned char y = 0;
-//   unsigned char checkPoint[4];
-//   unsigned char temp = 255;
-//   unsigned char i = 0;
-//   unsigned char j = 0;
-//   unsigned char k = 0;
-//   unsigned char turnVariety[4][2];
-//   unsigned char Priority = 1;
-//   unsigned char p = 0;
-//   unsigned char q = 0;
-//   unsigned char checkker = 0;
-//   unsigned int turnLisk[4];
-//   int tempLisk = 0;
+bool PathCreator::path_create_with_change(bool is_search, int tgt_x, int tgt_y,
+                                          Direction tgt_dir,
+                                          path_create_status_t &pc_state) {
+  //初期化
+  pc_result.time = 10000;
+  pc_result.use = false;
 
-//   // deadEnd(goalX, goalY);
-//   //	updateVectorMap(goalX, goalY, false, isFull);
-//   vectorDistUpdate(goalX, goalY, isFull);
-//   for (i = 0; checkQ[i] != 0; i++) {
-//     pathVariation[0] = 255;
-//     pathVariation[1] = 255;
-//     pathVariation[2] = 255;
-//     pathVariation[3] = 255;
-//     checkPoint[0] = 0;
-//     checkPoint[1] = 0;
-//     checkPoint[2] = 0;
-//     checkPoint[3] = 0;
-//     turnLisk[0] = 255;
-//     turnLisk[1] = 255;
-//     turnLisk[2] = 255;
-//     turnLisk[3] = 255;
-//     x = (checkQ[i] / 16);
-//     y = checkQ[i] & 0x0f;
-//     if (checkMap[x][y] != 0 && (checkMap[x][y] & 0xf0) == 0) {
-//       if ((checkMap[x][y] & 0x01) == 0x01) {
-//         pathVariation[0] = pathCreateChange(goalX, goalY, x, y, North);
-//         // myprintf("north(%d,%d) %f\r\n", x, y, pathVariation[0]);
-//         if (checkTurningPoint) {
-//           checkPoint[0] = North;
-//         }
-//         if (pathVariation[0] != 255) {
-//           turnLisk[0] = countTurnLisk();
-//           for (k = 0; path_t[k] != 255; k++) {
-//             if (path_t[k] < 7) {
-//               turnVariety[0][0] += 1;
-//             } else {
-//               turnVariety[0][1] += 1;
-//             }
-//           }
-//         }
-//       }
-//       if ((checkMap[x][y] & 0x02) == 0x02) {
-//         pathVariation[1] = pathCreateChange(goalX, goalY, x, y, East);
-//         // myprintf("east(%d,%d) %f\r\n", x, y, pathVariation[1]);
-//         if (checkTurningPoint) {
-//           checkPoint[0] = East;
-//         }
-//         if (pathVariation[1] != 255) {
-//           turnLisk[1] = countTurnLisk();
-//           for (k = 0; path_t[k] != 255; k++) {
-//             if (path_t[k] < 7) {
-//               turnVariety[1][0] += 1;
-//             } else {
-//               turnVariety[1][1] += 1;
-//             }
-//           }
-//         }
-//       }
-//       if ((checkMap[x][y] & 0x04) == 0x04) {
-//         pathVariation[2] = pathCreateChange(goalX, goalY, x, y, West);
-//         // myprintf("west(%d,%d) %f\r\n", x, y, pathVariation[2]);
-//         if (checkTurningPoint) {
-//           checkPoint[0] = West;
-//         }
-//         if (pathVariation[2] != 255) {
-//           turnLisk[2] = countTurnLisk();
-//           for (k = 0; path_t[k] != 255; k++) {
-//             if (path_t[k] < 7) {
-//               turnVariety[2][0] += 1;
-//             } else {
-//               turnVariety[2][1] += 1;
-//             }
-//           }
-//         }
-//       }
-//       if ((checkMap[x][y] & 0x08) == 0x08) {
-//         pathVariation[3] = pathCreateChange(goalX, goalY, x, y, South);
-//         // myprintf("south(%d,%d) %f\r\n", x, y, pathVariation[3]);
-//         if (checkTurningPoint) {
-//           checkPoint[0] = South;
-//         }
-//         if (pathVariation[3] != 255) {
-//           turnLisk[3] = countTurnLisk();
-//           for (k = 0; path_t[k] != 255; k++) {
-//             if (path_t[k] < 7) {
-//               turnVariety[3][0] += 1;
-//             } else {
-//               turnVariety[3][1] += 1;
-//             }
-//           }
-//         }
-//       }
-//       temp = 255;
-//       tempLisk = 0;
-//       //			myprintf("%f	%f	%f	%f\r\n",
-//       //pathVariation[0], pathVariation[1], 					pathVariation[2], pathVariation[3]);
-//       for (j = 0; j < 4; j++) {
-//         if (pathVariation[j] < temp) {
-//           temp = pathVariation[j];
-//           if (j == 0) {
-//             check = 1;
-//           } else if (j == 1) {
-//             check = 2;
-//           } else if (j == 2) {
-//             check = 4;
-//           } else if (j == 3) {
-//             check = 8;
-//           }
-//         } else if (pathVariation[j] != 255 && pathVariation[j] == temp) {
-//           if (tempLisk < turnLisk[j]) {
-//             temp = pathVariation[j];
-//             tempLisk = turnLisk[j];
-//             if (j == 0) {
-//               check = 1;
-//             } else if (j == 1) {
-//               check = 2;
-//             } else if (j == 2) {
-//               check = 4;
-//             } else if (j == 3) {
-//               check = 8;
-//             }
-//           }
-//         }
-//       }
-//       //			myprintf("check=%d", check);
-//       if (Priority == 1) {
-//         if (pathVariation[0] == pathVariation[1] && pathVariation[0] != 255) {
-//           if (turnVariety[0][1] > turnVariety[1][1]) {
-//             check = 1;
-//           } else if (turnVariety[0][1] < turnVariety[1][1]) {
-//             check = 2;
-//           }
-//         } else if (pathVariation[1] == pathVariation[2] &&
-//                    pathVariation[1] != 255) {
-//           if (turnVariety[1][1] > turnVariety[2][1]) {
-//             check = 2;
-//           } else if (turnVariety[1][1] < turnVariety[2][1]) {
-//             check = 4;
-//           }
-//         } else if (pathVariation[2] == pathVariation[3] &&
-//                    pathVariation[2] != 255) {
-//           if (turnVariety[2][1] > turnVariety[3][1]) {
-//             check = 4;
-//           } else if (turnVariety[2][1] < turnVariety[3][1]) {
-//             check = 8;
-//           }
-//         } else if (pathVariation[3] == pathVariation[0] &&
-//                    pathVariation[3] != 255) {
-//           if (turnVariety[0][1] > turnVariety[3][1]) {
-//             check = 1;
-//           } else if (turnVariety[0][1] < turnVariety[3][1]) {
-//             check = 8;
-//           }
-//         } else if (pathVariation[3] == pathVariation[1] &&
-//                    pathVariation[1] != 255) {
-//           if (turnVariety[1][1] > turnVariety[3][1]) {
-//             check = 2;
-//           } else if (turnVariety[1][1] < turnVariety[3][1]) {
-//             check = 8;
-//           }
-//         } else if (pathVariation[0] == pathVariation[2] &&
-//                    pathVariation[2] != 255) {
-//           if (turnVariety[0][1] > turnVariety[2][1]) {
-//             check = 1;
-//           } else if (turnVariety[0][1] < turnVariety[2][1]) {
-//             check = 4;
-//           }
-//         }
-//       } else {
-//         if (pathVariation[0] == pathVariation[1] && pathVariation[0] != 255) {
-//           if (turnVariety[0][1] < turnVariety[1][1]) {
-//             check = 1;
-//           } else if (turnVariety[0][1] > turnVariety[1][1]) {
-//             check = 2;
-//           }
-//         } else if (pathVariation[1] == pathVariation[2] &&
-//                    pathVariation[1] != 255) {
-//           if (turnVariety[1][1] < turnVariety[2][1]) {
-//             check = 2;
-//           } else if (turnVariety[1][1] > turnVariety[2][1]) {
-//             check = 4;
-//           }
-//         } else if (pathVariation[2] == pathVariation[3] &&
-//                    pathVariation[2] != 255) {
-//           if (turnVariety[2][1] < turnVariety[3][1]) {
-//             check = 4;
-//           } else if (turnVariety[2][1] > turnVariety[3][1]) {
-//             check = 8;
-//           }
-//         } else if (pathVariation[3] == pathVariation[0] &&
-//                    pathVariation[3] != 255) {
-//           if (turnVariety[0][1] < turnVariety[3][1]) {
-//             check = 1;
-//           } else if (turnVariety[0][1] > turnVariety[3][1]) {
-//             check = 8;
-//           }
-//         } else if (pathVariation[3] == pathVariation[1] &&
-//                    pathVariation[1] != 255) {
-//           if (turnVariety[1][1] < turnVariety[3][1]) {
-//             check = 2;
-//           } else if (turnVariety[1][1] > turnVariety[3][1]) {
-//             check = 8;
-//           }
-//         } else if (pathVariation[0] == pathVariation[2] &&
-//                    pathVariation[2] != 255) {
-//           if (turnVariety[0][1] < turnVariety[2][1]) {
-//             check = 1;
-//           } else if (turnVariety[0][1] > turnVariety[2][1]) {
-//             check = 4;
-//           }
-//         }
-//       }
-//       //			myprintf("check=%d", check);
-//       if ((checkPoint[0] == 0 && checkPoint[1] == 0 && checkPoint[2] == 0 &&
-//            checkPoint[3] == 0) ||
-//           check == 0) {
-//         deleteQ(x, y);
-//         if (!checkDualCheck(x, y)) {
-//           addQ(x, y);
-//         }
-//         i -= 1;
-//       } else {
-//         checkker = (check << 4) | (checkMap[x][y] & 0x0f);
-//         checkMap[x][y] = checkker;
-//       }
-//       for (p = 0; p < 4; p++) {
-//         for (q = 0; q < 2; q++) {
-//           turnVariety[p][q] = 0;
-//         }
-//       }
-//     }
-//   }
-//   for (i = 0; checkQ[i] != 0; i++) {
-//     pathVariation[0] = 255;
-//     pathVariation[1] = 255;
-//     pathVariation[2] = 255;
-//     pathVariation[3] = 255;
-//     checkPoint[0] = 0;
-//     checkPoint[1] = 0;
-//     checkPoint[2] = 0;
-//     checkPoint[3] = 0;
-//     x = (checkQ[i] / 16);
-//     y = checkQ[i] & 0x0f;
-//     if ((checkMap[x][y] & 0x01) == 0x01) {
-//       pathVariation[0] = pathCreateChange(goalX, goalY, x, y, North);
-//       if (checkPoint) {
-//         checkPoint[0] = North;
-//       }
-//       if (pathVariation[0] != 255) {
-//         for (k = 0; path_t[k] != 255; k++) {
-//           if (path_t[k] < 7) {
-//             turnVariety[0][0] += 1;
-//           } else {
-//             turnVariety[0][1] += 1;
-//           }
-//         }
-//       }
-//     }
-//     if ((checkMap[x][y] & 0x02) == 0x02) {
-//       pathVariation[1] = pathCreateChange(goalX, goalY, x, y, East);
-//       if (checkPoint) {
-//         checkPoint[0] = East;
-//       }
-//       if (pathVariation[1] != 255) {
-//         for (k = 0; path_t[k] != 255; k++) {
-//           if (path_t[k] < 7) {
-//             turnVariety[1][0] += 1;
-//           } else {
-//             turnVariety[1][1] += 1;
-//           }
-//         }
-//       }
-//     }
-//     if ((checkMap[x][y] & 0x04) == 0x04) {
-//       pathVariation[2] = pathCreateChange(goalX, goalY, x, y, West);
-//       if (checkPoint) {
-//         checkPoint[0] = West;
-//       }
-//       if (pathVariation[2] != 255) {
-//         for (k = 0; path_t[k] != 255; k++) {
-//           if (path_t[k] < 7) {
-//             turnVariety[2][0] += 1;
-//           } else {
-//             turnVariety[2][1] += 1;
-//           }
-//         }
-//       }
-//     }
-//     if ((checkMap[x][y] & 0x08) == 0x08) {
-//       pathVariation[3] = pathCreateChange(goalX, goalY, x, y, South);
-//       if (checkPoint) {
-//         checkPoint[0] = South;
-//       }
-//       if (pathVariation[3] != 255) {
-//         for (k = 0; path_t[k] != 255; k++) {
-//           if (path_t[k] < 7) {
-//             turnVariety[3][0] += 1;
-//           } else {
-//             turnVariety[3][1] += 1;
-//           }
-//         }
-//       }
-//     }
-//     //		myprintf("%f	%f	%f	%f\r\n", pathVariation[0],
-//     //pathVariation[1], 				pathVariation[2], pathVariation[3]);
-//     temp = 255;
-//     tempLisk = 0;
-//     for (j = 0; j < 4; j++) {
-//       if (pathVariation[j] < temp) {
-//         temp = pathVariation[j];
-//         if (j == 0) {
-//           check = 1;
-//         } else if (j == 1) {
-//           check = 2;
-//         } else if (j == 2) {
-//           check = 4;
-//         } else if (j == 3) {
-//           check = 8;
-//         }
-//         //			} else if (pathVariation[j] != 255 &&
-//         //pathVariation[j] == temp) { 				if (tempLisk < turnLisk[j]) { 					temp =
-//         //pathVariation[j]; 					tempLisk = turnLisk[j]; 					if (j == 0) { 						check = 1; 					}
-//         //else if (j == 1) { 						check = 2; 					} else if (j == 2) { 						check = 4; 					} else
-//         //if (j == 3) { 						check = 8;
-//         //					}
-//         //				}
-//       }
-//     }
-//     //		myprintf("check=%d", check);
-//     if (Priority == 1) {
-//       if (pathVariation[0] == pathVariation[1] && pathVariation[0] != 255) {
-//         if (turnVariety[0][1] > turnVariety[1][1]) {
-//           check = 1;
-//         } else if (turnVariety[0][1] < turnVariety[1][1]) {
-//           check = 2;
-//         }
-//       } else if (pathVariation[1] == pathVariation[2] &&
-//                  pathVariation[1] != 255) {
-//         if (turnVariety[1][1] > turnVariety[2][1]) {
-//           check = 2;
-//         } else if (turnVariety[1][1] < turnVariety[2][1]) {
-//           check = 4;
-//         }
-//       } else if (pathVariation[2] == pathVariation[3] &&
-//                  pathVariation[2] != 255) {
-//         if (turnVariety[2][1] > turnVariety[3][1]) {
-//           check = 4;
-//         } else if (turnVariety[2][1] < turnVariety[3][1]) {
-//           check = 8;
-//         }
-//       } else if (pathVariation[3] == pathVariation[0] &&
-//                  pathVariation[3] != 255) {
-//         if (turnVariety[0][1] > turnVariety[3][1]) {
-//           check = 1;
-//         } else if (turnVariety[0][1] < turnVariety[3][1]) {
-//           check = 8;
-//         }
-//       } else if (pathVariation[3] == pathVariation[1] &&
-//                  pathVariation[1] != 255) {
-//         if (turnVariety[1][1] > turnVariety[3][1]) {
-//           check = 2;
-//         } else if (turnVariety[1][1] < turnVariety[3][1]) {
-//           check = 8;
-//         }
-//       } else if (pathVariation[0] == pathVariation[2] &&
-//                  pathVariation[2] != 255) {
-//         if (turnVariety[0][1] > turnVariety[2][1]) {
-//           check = 1;
-//         } else if (turnVariety[0][1] < turnVariety[2][1]) {
-//           check = 4;
-//         }
-//       }
-//     } else {
-//       if (pathVariation[0] == pathVariation[1] && pathVariation[0] != 255) {
-//         if (turnVariety[0][1] < turnVariety[1][1]) {
-//           check = 1;
-//         } else if (turnVariety[0][1] > turnVariety[1][1]) {
-//           check = 2;
-//         }
-//       } else if (pathVariation[1] == pathVariation[2] &&
-//                  pathVariation[1] != 255) {
-//         if (turnVariety[1][1] < turnVariety[2][1]) {
-//           check = 2;
-//         } else if (turnVariety[1][1] > turnVariety[2][1]) {
-//           check = 4;
-//         }
-//       } else if (pathVariation[2] == pathVariation[3] &&
-//                  pathVariation[2] != 255) {
-//         if (turnVariety[2][1] < turnVariety[3][1]) {
-//           check = 4;
-//         } else if (turnVariety[2][1] > turnVariety[3][1]) {
-//           check = 8;
-//         }
-//       } else if (pathVariation[3] == pathVariation[0] &&
-//                  pathVariation[3] != 255) {
-//         if (turnVariety[0][1] < turnVariety[3][1]) {
-//           check = 1;
-//         } else if (turnVariety[0][1] > turnVariety[3][1]) {
-//           check = 8;
-//         }
-//       } else if (pathVariation[3] == pathVariation[1] &&
-//                  pathVariation[1] != 255) {
-//         if (turnVariety[1][1] < turnVariety[3][1]) {
-//           check = 2;
-//         } else if (turnVariety[1][1] > turnVariety[3][1]) {
-//           check = 8;
-//         }
-//       } else if (pathVariation[0] == pathVariation[2] &&
-//                  pathVariation[2] != 255) {
-//         if (turnVariety[0][1] < turnVariety[2][1]) {
-//           check = 1;
-//         } else if (turnVariety[0][1] > turnVariety[2][1]) {
-//           check = 4;
-//         }
-//       }
-//     }
-//     if (checkPoint[0] == 0 && checkPoint[1] == 0 && checkPoint[2] == 0 &&
-//         checkPoint[3] == 0) {
-//       deleteQ(x, y);
-//       if (!checkDualCheck(x, y)) {
-//         addQ(x, y);
-//       }
-//       i -= 1;
-//     } else {
-//       int checkker = (check << 4) | (checkMap[x][y] & 0x0f);
-//       checkMap[x][y] = checkker;
-//       //			myprintf("(%2x,%2x)=%2x\r\n", x, y, checkker);
-//     }
-//     for (p = 0; p < 4; p++) {
-//       for (q = 0; q < 2; q++) {
-//         turnVariety[p][q] = 0;
-//       }
-//     }
-//   }
-//   return pathCreateChange(goalX, goalY, 0, 0, 1);
-// }
+  pc_result.state =
+      path_create(is_search, tgt_x, tgt_y, tgt_dir, pc_result.use);
+  if (!pc_result.state) {
+    return false;
+  }
+  convert_large_path(true);
+  diagonalPath(false, true);
+  float len_t = 0;
+  float len_s = 0;
+
+//  for (int i = 0; i < path_t.size(); i++) {
+//    len_s += path_s[i];
+//    if (path_t[i] == 7 || path_t[i] == 8) {
+//      if ((path_s[i + 1] * 0.5 - 1) > 0) {
+//        len_t += 1;
+//      } else {
+//        len_t += 1;
+//      }
+//    }
+//    if (path_t[i] == 9 || path_t[i] == 10) {
+//      if ((path_s[i + 1] * 0.5 - 1) > 0) {
+//        len_t += 1.5;
+//      } else {
+//        len_t += 1.5;
+//      }
+//    } else if (path_t[i] == 11 || path_t[i] == 12) {
+//      len_t += 1;
+//    } else {
+//      len_t += 1;
+//    }
+//  }
+  //  for (int i = 0; i < path_t.size(); i++) {
+  //    len_t++;
+  //    len_s += path_s[i];
+  //    if (path_t[i] == 255) {
+  //      break;
+  //    }
+  //  }
+  // pc_result.time = len_s + len_t;
+  pc_result.time = calc_goal_time();
+  //    pc_result.time =  len_t;
+
+  return true;
+}
+
+float PathCreator::drawChangePathRoot(bool is_search) {
+  bool next_end = false;
+  candidate_route_info_t tmp_cand_route;
+  float time =10000;
+
+
+  for (int i = 0; i < 100; i++) { //何かでリミットを設ける
+    const auto before = other_route_map.size();
+    unordered_map<int, candidate_route_info_t>::iterator itr =
+        other_route_map.begin();
+    for (itr; itr != other_route_map.end(); itr++) {
+      auto tmp_cand = (itr->second);
+      if (tmp_cand.selected) {
+        //決定済みなら、固定したルートだけ入れる
+        tmp_cand.candidate_dir_set.clear();
+        tmp_cand.candidate_dir_set.insert(tmp_cand.select_dir);
+      } else {
+        route_q.push((itr->second));
+      }
+    }
+    while (!route_q.empty()) {
+      const auto cand = route_q.top();
+      route_q.pop();
+      int x = cand.x;
+      int y = cand.y;
+      //初期化
+      while (!route_list.empty()) {
+        route_list.pop();
+      }
+      // 該当の位置で分岐してPathを形成。それぞれ評価。
+      for (const auto dir : cand.candidate_dir_set) {
+        bool goal = path_create_with_change(true, x, y, dir, pc_result);
+        if (!pc_result.state || !goal) {
+          // たどり着かない等、詰んでいたら元のセットから除外。
+          other_route_map[x + lgc->maze_size * y].candidate_dir_set.erase(dir);
+        } else {
+          route.time = pc_result.time;
+          if(time>route.time){
+              time = route.time;
+              path_s2.clear();
+              path_t2.clear();
+              for (int i = 0; i < path_t.size(); i++) {
+                  path_s2.push_back(path_s[i]);
+                  path_t2.push_back(path_t[i]);
+              }
+          }
+          route.dir = dir;
+          route.use = pc_result.use;
+          route_list.push(route);
+        }
+      }
+      // priority queueで最良ルートがトップに来るので、それだけ使う。
+      if (route_list.size() > 0) {
+        const auto top = route_list.top();
+        if (top.use) {
+          //矯正指定して意味があったら固定する。意味がないなら何もしない。
+          other_route_map[x + lgc->maze_size * y].selected = true;
+          other_route_map[x + lgc->maze_size * y].select_dir = top.dir;
+        }
+      }
+    }
+
+    const auto after = other_route_map.size();
+    // このアルゴリズムで辿れるルートの膨れ上がりが止まったら終了。一応for文でlimitは設ける。
+    if (next_end) {
+      break;
+    }
+    if (before == after) {
+      //      break;
+      next_end = true;
+    }
+  }
+  return 0;
+}
+// 他のルートがあったらmapに保存する
+void PathCreator::checkOtherRoot(int x, int y, Direction now_dir, float now) {
+  //１度見つけてるやつはスルー
+  if (other_route_map.count(x + y * lgc->maze_size) > 0) {
+    return;
+  }
+
+  const int now_d = static_cast<int>(now_dir);
+  candidate_route_info_t cand;
+  //候補になる向きを探す。
+  for (const auto d : direction_list) {
+    const auto dist = lgc->getDistVector(x, y, d);
+    const auto d_int = static_cast<int>(d);
+    if (now_d * d_int != 8 && !lgc->existWall(x, y, d) && dist < now) {
+      other_route_map[x + y * lgc->maze_size].candidate_dir_set.insert(d);
+    }
+  }
+  //候補が１つなら削除
+  if (other_route_map[x + y * lgc->maze_size].candidate_dir_set.size() <= 1) {
+    other_route_map.erase(x + y * lgc->maze_size);
+  } else {
+    // 2つ以上あるなら正式登録
+    other_route_map[x + y * lgc->maze_size].from_dist = now;
+    other_route_map[x + y * lgc->maze_size].x = x;
+    other_route_map[x + y * lgc->maze_size].y = y;
+  }
+}
+
+float PathCreator::calc_goal_time() {
+  bool fast_mode = false;
+  bool start_turn = false;
+  bool dia = false;
+  float cell_size = 90;
+  float v_now = 0;
+  float time = 0;
+  Direction ego_dir = Direction::North;
+  for (int i = 0; i < path_t.size(); i++) {
+    float dist = 0.5 * path_s[i] - 1;
+    auto turn_dir = tc.get_turn_dir(path_t[i]);
+    auto turn_type = tc.get_turn_type(path_t[i], dia);
+    start_turn = false;
+    if (dist > 0) {
+      fast_mode = true;
+    }
+    if ((dist > 0 ) || i == 0) {
+      auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
+
+      float v_max = 4000;
+      float v_end = 1000;
+      float accl = 12000;
+      float decel = -12000;
+
+      float dist2 = !dia ? (dist * cell_size) : (dist * cell_size * ROOT2);
+      if (i == 0) {
+        if (dist == 0) { // 初手ターンの場合は距離合成して加速区間を増やす
+          dist = 10;
+          start_turn = true;
+        }
+        dist2 += 18; // 初期加速距離を加算
+        auto tmp_v2 = 2 * accl * dist2;
+        if (v_end * v_end > tmp_v2) {
+          accl = (v_end * v_end) / (2 * dist2) + 1000;
+          decel = -accl;
+        }
+      }
+      if (turn_type == TurnType::Finish) {
+        dist -= 45;
+        v_end = 500;
+      }
+
+      time += go_straight_dummy(v_now, v_max, v_end, accl, decel, dist2);
+      v_now = v_end;
+      if (turn_type == TurnType::Finish) {
+        break;
+      }
+    }
+
+    if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
+      auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
+      bool exist_next_idx = (i + 1) < path_t.size(); //絶対true
+      float dist3 = 0;
+      float dist4 = 0;
+      if (exist_next_idx) {
+        dist3 = 0.5 * path_s[i + 1] * cell_size;
+        dist4 = 0.5 * path_s[i + 1] - 1;
+      }
+      // スラロームの後距離の目標速度を指定
+
+      float v_max = 4000;
+      float v_end = 1000;
+      float accl = 12000;
+      float decel = -12000;
+      float slalom_time = 0.2;
+
+      time += slalom_dummy(turn_type);
+      dia =
+          (ego_dir == Direction::NorthEast || ego_dir == Direction::NorthWest ||
+           ego_dir == Direction::SouthEast || ego_dir == Direction::SouthWest);
+    }
+  }
+  return time;
+}
+
+
+char PathCreator::asc(float d, float d2) {
+	if (d < d2) {
+		return 2;
+	}
+	return 1;
+}
+
+float PathCreator::go_straight_dummy(float v1, float vmax, float v2, float ac,
+                                     float diac, float dist) {
+
+  double dt = 0.001;
+  double acc = ac;
+  double distance = 0;
+  double time = 0;
+  double V_now = v1;
+  int sequence = 1;
+  double d2;
+  while (distance < dist) {
+    time += dt;
+    d2 = std::abs((V_now + v2) * (V_now - v2) / (2.0 * diac));
+    switch (sequence) {
+    case 3:
+      acc = 0;
+      break;
+    case 1:
+      sequence = asc(dist - distance, d2);
+      if (V_now >= vmax) {
+        acc = 0;
+        V_now = vmax;
+      } else {
+        acc = ac;
+      }
+      if (sequence != 3) {
+        break;
+      }
+    case 2:
+      if (V_now <= v2) {
+        acc = 0;
+        V_now = v2;
+      } else {
+        acc = -diac;
+      }
+      break;
+    }
+    V_now += acc * dt;
+    distance += V_now * dt;
+  }
+
+  return time;
+}
+float PathCreator::slalom_dummy(TurnType turn_type) {
+    if(turn_type==TurnType::Normal){
+        return 0.112813 * 2;
+    }else if(turn_type==TurnType::Orval){
+        return 0.061749999999994934 * 2;
+    }else if(turn_type==TurnType::Large){
+        return 0.061749999999994934 * 2;
+    }else if(turn_type==TurnType::Dia45){
+        return 0.033968749999997994 * 2;
+    }else if(turn_type==TurnType::Dia135){
+        return 0.07409374999999872 * 2;
+    }else if(turn_type==TurnType::Dia45_2){
+        return 0.042953124999997004 * 2;
+    }else if(turn_type==TurnType::Dia135_2){
+        return 0.061749999999994934 * 2;
+    }else if(turn_type==TurnType::Dia90){
+        return 0.037046874999997655 * 2;
+    }
+  return 0.112813 * 2;
+}

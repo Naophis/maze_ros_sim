@@ -144,6 +144,56 @@ void Viewer::timer_callback(const ros::TimerEvent &e) {
   loop++;
   if (loop >= MAX_LOOP)
     loop = 0;
+  if (initflag3) {
+    candidate_map_list[loop]->markers.resize(1);
+    candidate_map_list[loop]->markers[0].action = Marker::DELETEALL;
+
+    tf::Quaternion quat = tf::createQuaternionFromRPY(0, 0, 0);
+    int id = 0;
+    for (const auto cell : candi_map.map) {
+      double x = cell_size * cell.x + cell_size / 2;
+      double y = cell_size * cell.y + cell_size / 2;
+      for (const auto d : cell.dir) {
+        double x2 = 0;
+        double y2 = 0;
+        if (d == 1) {
+          y2 = cell_size / 2;
+        } else if (d == 2) {
+          x2 = cell_size / 2;
+        } else if (d == 4) {
+          x2 = -cell_size / 2;
+        } else if (d == 8) {
+          y2 = -cell_size / 2;
+        }
+
+        Marker mk;
+        mk.id = id++;
+        mk.ns = "map";
+        mk.header.frame_id = "map";
+        mk.header.stamp = ros::Time::now();
+        mk.type = Marker::TEXT_VIEW_FACING;
+        mk.action = Marker::ADD;
+        mk.color.r = 1;
+        mk.color.g = 1;
+        mk.color.b = 0;
+        mk.color.a = 1;
+
+        mk.pose.position.x = (x + x2) / 1000;
+        mk.pose.position.y = (y + y2) / 1000;
+        mk.pose.position.z = 0.07;
+        mk.pose.position.z = 0.7;
+        mk.pose.position.z = -0.001;
+        mk.pose.orientation.x = quat[0];
+        mk.pose.orientation.y = quat[1];
+        mk.pose.orientation.z = quat[2];
+        mk.pose.orientation.w = quat[3];
+        mk.scale.z = 0.05;
+        mk.text = "[    ]";
+        candidate_map_list[loop]->markers.emplace_back(mk);
+      }
+    }
+    pub_candi_map.publish(candidate_map_list[loop]);
+  }
 }
 
 void Viewer::create_ego_marker() {
@@ -435,6 +485,7 @@ void Viewer::init() {
     maze_diainfo_list[i].reset(new MarkerArray);
     ego_marker_list[i].reset(new MarkerArray);
     path_array_list[i].reset(new Marker);
+    candidate_map_list[i].reset(new MarkerArray);
   }
   pub_wall_list[0] = _nh.advertise<MarkerArray>("/viewer/wall_list0", 1);
   pub_wall_list[1] = _nh.advertise<MarkerArray>("/viewer/wall_list1", 1);
@@ -446,6 +497,7 @@ void Viewer::init() {
   pub_ego_marker = _nh.advertise<MarkerArray>("/viewer/ego_marker", 1);
 
   pub_path_marker = _nh.advertise<Marker>("/viewer/path_marker", 1);
+  pub_candi_map = _nh.advertise<MarkerArray>("/viewer/pub_candi_map", 1);
 
   for (int i = 0; i < 4; i++) {
     wall_list[0].reset(new MarkerArray);
@@ -749,12 +801,19 @@ void Viewer::makeButtonMarker(const tf::Vector3 &position) {
                          boost::bind(&Viewer::processFeedback, this, _1));
   sub_maze = _nh.subscribe("/maze", 10, &Viewer::maze_callback, this);
   sub_path = _nh.subscribe("/path_info", 10, &Viewer::path_callback, this);
+  sub_candidate_map = _nh.subscribe("/candidate_route_map", 10,
+                                    &Viewer::candimap_callback, this);
 }
 
 void Viewer::maze_callback(const my_msg::mazeConstPtr &_mz) {
   mz = *_mz;
   initflag = true;
   set_data();
+}
+
+void Viewer::candimap_callback(const my_msg::candidate_route_mapConstPtr &_mz) {
+  candi_map = *_mz;
+  initflag3 = true;
 }
 
 void Viewer::path_callback(const my_msg::pathConstPtr &_path) {

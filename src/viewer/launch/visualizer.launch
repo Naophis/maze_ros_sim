@@ -496,12 +496,12 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2012hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2013hef.yaml" /> -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2014hef.yaml" /> -->
-    <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2015hef.yaml" />  -->
+    <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2015hef.yaml" /> 
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2016hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2017hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2018hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2018hes.yaml" />  -->
-    <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2019hef.yaml" /> 
+    <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2019hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/japan2019hes.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2014hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2015hef.yaml" />  -->
@@ -509,8 +509,8 @@
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2017hef.yaml" />  -->
     <!-- <rosparam command="load" file="$(find maze_solver)/config/halfsize/taiwan2018hef.yaml" />  -->
 
-    <param name="maze_data/known" value="1" />
-    <!-- <param name="maze_data/known" value="0" /> -->
+    <!-- <param name="maze_data/known" value="1" /> -->
+    <param name="maze_data/known" value="0" />
     <param name="chopped/dt" value="5.0" />
 
     <rosparam command="load" file="$(find maze_solver)/config/slalom.yaml" />

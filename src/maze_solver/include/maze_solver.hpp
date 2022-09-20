@@ -3,7 +3,9 @@
 
 #include "stdio.h"
 #include <cmath>
+#include <set>
 #include <vector>
+#include "enums.hpp"
 
 using namespace std;
 constexpr unsigned char MAX_MAZE_SIZE = 32;
@@ -42,6 +44,38 @@ enum class Direction : int {
   Null = 0
 };
 
+typedef struct {
+    std::set<Direction> candidate_dir_set;
+    bool selected = false;
+    Direction select_dir =Direction::Null;
+    float from_dist;
+    int x;
+    int y;
+} candidate_route_info_t;
+
+typedef struct {
+    Direction dir;
+    float time;
+    bool use;
+} route_t;
+
+typedef struct{
+    float time;
+    bool state;
+    bool use;
+} path_create_status_t;
+
+struct CompairCandiRoute {
+    bool operator()(candidate_route_info_t const &p1, candidate_route_info_t const &p2) {
+        return p1.from_dist < p2.from_dist;
+    }
+};
+struct CompairRoute {
+    bool operator()(route_t const &p1, route_t const &p2) {
+        return p1.time > p2.time;
+    }
+};
+
 enum class Motion : int {
   NONE = 0,
   Straight = 1,
@@ -65,6 +99,12 @@ enum class PathMotion : int {
   End = 255,
 };
 
+enum class StraightType : int {
+  Search = 0,
+  FastRun = 1,
+  FastRunDia = 2,
+};
+
 enum class TurnType : int {
   None = 0,
   Normal = 1,
@@ -74,6 +114,8 @@ enum class TurnType : int {
   Dia135 = 5,
   Dia90 = 6,
   Kojima = 7,
+  Dia45_2 = 8,
+  Dia135_2 = 9,
   Finish = 255,
 };
 

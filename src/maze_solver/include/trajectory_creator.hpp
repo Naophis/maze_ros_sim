@@ -12,7 +12,6 @@ using namespace std;
 class TrajectoryCreator {
 private:
   TurnType get_turn_type(int turn_num);
-  TurnDirection get_turn_dir(int turn_dir);
   float get_run_dir(Direction dir, float ang);
   float get_turn_tgt_ang(TurnType type);
   float get_turn_rad(TurnType type);
@@ -63,6 +62,9 @@ public:
   void exec3(path_struct &base_path, vector<trajectory_point_t> &trajectory);
   void make_chopped_trajectory(vector<trajectory_point_t> &trajectory,
                                int turn_num, bool dia);
+
+  TurnDirection get_turn_dir(int turn_dir);
+  TurnType get_turn_type(int turn_num, bool dia);
   double chop_dt = 3;
   slalom_data_t sla_data;
 };

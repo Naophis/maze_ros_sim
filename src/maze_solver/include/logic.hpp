@@ -184,6 +184,7 @@ public:
   void priorityStraight2(int x, int y, Direction now_dir, Direction dir,
                          float &dist_val, Direction &next_dir);
   std::vector<dir_pt_t> memo_q;
+    unsigned int VectorMax = vector_max_step_val;
 private:
   vector<unsigned char> map;
   vector<unsigned int> dist;
@@ -194,7 +195,7 @@ private:
   unsigned int maze_list_size;
   unsigned int goal_list_size;
   unsigned int vector_max_step_val = 180 * 1024;
-  unsigned int VectorMax = vector_max_step_val;
+
   int Value = 0;
   unsigned int borderLv1 = 0;
   unsigned int borderLv2 = 2;

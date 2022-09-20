@@ -927,7 +927,7 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
   Direction dirLog[3];
   point_t pt;
   pt.x = 0;
-  pt.y = 0;
+  pt.y = 1;
   search_log.clear();
 
   dirLog[2] = dirLog[1] = dirLog[0] = now_dir;
@@ -939,7 +939,7 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
     dirLog[2] = dirLog[1];
     dirLog[1] = dirLog[0];
     dirLog[0] = now_dir;
-    Value = VectorMax;
+    Value = vector_max_step_val;
     next_dir = Direction::Undefined;
     pt.x = x;
     pt.y = y;
@@ -948,21 +948,31 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
     if (arrival_goal_position(x, y))
       break;
 
-    const unsigned int position = getDistVector(x, y, now_dir);
+    float position = getDistVector(x, y, now_dir);
+
+    if (now_dir == Direction::North) {
+      position = getDistVector(x, y, Direction::South);
+    } else if (now_dir == Direction::East) {
+      position = getDistVector(x, y, Direction::West);
+    } else if (now_dir == Direction::West) {
+      position = getDistVector(x, y, Direction::East);
+    } else if (now_dir == Direction::South) {
+      position = getDistVector(x, y, Direction::North);
+    }
 
     setNextRootDirectionPathUnKnown(x, y, Direction::North, now_dir, next_dir,
-                                    Value);
+                                    position);
     setNextRootDirectionPathUnKnown(x, y, Direction::East, now_dir, next_dir,
-                                    Value);
+                                    position);
     setNextRootDirectionPathUnKnown(x, y, Direction::West, now_dir, next_dir,
-                                    Value);
+                                    position);
     setNextRootDirectionPathUnKnown(x, y, Direction::South, now_dir, next_dir,
-                                    Value);
+                                    position);
 
     if (dirLog[0] == dirLog[1] || dirLog[0] != dirLog[2])
-      priorityStraight2(x, y, now_dir, dirLog[0], Value, next_dir);
+      priorityStraight2(x, y, now_dir, dirLog[0], position, next_dir);
     else
-      priorityStraight2(x, y, now_dir, dirLog[1], Value, next_dir);
+      priorityStraight2(x, y, now_dir, dirLog[1], position, next_dir);
 
     if (next_dir == Direction::North) {
       if (is_unknown(x, y, Direction::North))
