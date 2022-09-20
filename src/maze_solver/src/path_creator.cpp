@@ -151,7 +151,12 @@ bool PathCreator::path_create(bool is_search, int tgt_x, int tgt_y,
   float dist_val = MAX;
   float old_dist_val = MAX;
   unordered_map<int, int> stepped;
+  int cnt = 0;
   while (true) {
+    cnt++;
+    if (cnt > 1023) {
+      return false;
+    }
     float old_dist_val = dist_val;
     now_dir = next_dir;
     dirLog[2] = dirLog[1];
@@ -588,27 +593,27 @@ bool PathCreator::path_create_with_change(bool is_search, int tgt_x, int tgt_y,
   float len_t = 0;
   float len_s = 0;
 
-//  for (int i = 0; i < path_t.size(); i++) {
-//    len_s += path_s[i];
-//    if (path_t[i] == 7 || path_t[i] == 8) {
-//      if ((path_s[i + 1] * 0.5 - 1) > 0) {
-//        len_t += 1;
-//      } else {
-//        len_t += 1;
-//      }
-//    }
-//    if (path_t[i] == 9 || path_t[i] == 10) {
-//      if ((path_s[i + 1] * 0.5 - 1) > 0) {
-//        len_t += 1.5;
-//      } else {
-//        len_t += 1.5;
-//      }
-//    } else if (path_t[i] == 11 || path_t[i] == 12) {
-//      len_t += 1;
-//    } else {
-//      len_t += 1;
-//    }
-//  }
+  //  for (int i = 0; i < path_t.size(); i++) {
+  //    len_s += path_s[i];
+  //    if (path_t[i] == 7 || path_t[i] == 8) {
+  //      if ((path_s[i + 1] * 0.5 - 1) > 0) {
+  //        len_t += 1;
+  //      } else {
+  //        len_t += 1;
+  //      }
+  //    }
+  //    if (path_t[i] == 9 || path_t[i] == 10) {
+  //      if ((path_s[i + 1] * 0.5 - 1) > 0) {
+  //        len_t += 1.5;
+  //      } else {
+  //        len_t += 1.5;
+  //      }
+  //    } else if (path_t[i] == 11 || path_t[i] == 12) {
+  //      len_t += 1;
+  //    } else {
+  //      len_t += 1;
+  //    }
+  //  }
   //  for (int i = 0; i < path_t.size(); i++) {
   //    len_t++;
   //    len_s += path_s[i];
@@ -626,8 +631,7 @@ bool PathCreator::path_create_with_change(bool is_search, int tgt_x, int tgt_y,
 float PathCreator::drawChangePathRoot(bool is_search) {
   bool next_end = false;
   candidate_route_info_t tmp_cand_route;
-  float time =10000;
-
+  float time = 10000;
 
   for (int i = 0; i < 100; i++) { //何かでリミットを設ける
     const auto before = other_route_map.size();
@@ -660,14 +664,14 @@ float PathCreator::drawChangePathRoot(bool is_search) {
           other_route_map[x + lgc->maze_size * y].candidate_dir_set.erase(dir);
         } else {
           route.time = pc_result.time;
-          if(time>route.time){
-              time = route.time;
-              path_s2.clear();
-              path_t2.clear();
-              for (int i = 0; i < path_t.size(); i++) {
-                  path_s2.push_back(path_s[i]);
-                  path_t2.push_back(path_t[i]);
-              }
+          if (time > route.time) {
+            time = route.time;
+            path_s2.clear();
+            path_t2.clear();
+            for (int i = 0; i < path_t.size(); i++) {
+              path_s2.push_back(path_s[i]);
+              path_t2.push_back(path_t[i]);
+            }
           }
           route.dir = dir;
           route.use = pc_result.use;
@@ -741,7 +745,7 @@ float PathCreator::calc_goal_time() {
     if (dist > 0) {
       fast_mode = true;
     }
-    if ((dist > 0 ) || i == 0) {
+    if ((dist > 0) || i == 0) {
       auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
 
       float v_max = 4000;
@@ -800,12 +804,11 @@ float PathCreator::calc_goal_time() {
   return time;
 }
 
-
 char PathCreator::asc(float d, float d2) {
-	if (d < d2) {
-		return 2;
-	}
-	return 1;
+  if (d < d2) {
+    return 2;
+  }
+  return 1;
 }
 
 float PathCreator::go_straight_dummy(float v1, float vmax, float v2, float ac,
@@ -852,22 +855,22 @@ float PathCreator::go_straight_dummy(float v1, float vmax, float v2, float ac,
   return time;
 }
 float PathCreator::slalom_dummy(TurnType turn_type) {
-    if(turn_type==TurnType::Normal){
-        return 0.112813 * 2;
-    }else if(turn_type==TurnType::Orval){
-        return 0.061749999999994934 * 2;
-    }else if(turn_type==TurnType::Large){
-        return 0.061749999999994934 * 2;
-    }else if(turn_type==TurnType::Dia45){
-        return 0.033968749999997994 * 2;
-    }else if(turn_type==TurnType::Dia135){
-        return 0.07409374999999872 * 2;
-    }else if(turn_type==TurnType::Dia45_2){
-        return 0.042953124999997004 * 2;
-    }else if(turn_type==TurnType::Dia135_2){
-        return 0.061749999999994934 * 2;
-    }else if(turn_type==TurnType::Dia90){
-        return 0.037046874999997655 * 2;
-    }
+  if (turn_type == TurnType::Normal) {
+    return 0.112813 * 2;
+  } else if (turn_type == TurnType::Orval) {
+    return 0.061749999999994934 * 2;
+  } else if (turn_type == TurnType::Large) {
+    return 0.061749999999994934 * 2;
+  } else if (turn_type == TurnType::Dia45) {
+    return 0.033968749999997994 * 2;
+  } else if (turn_type == TurnType::Dia135) {
+    return 0.07409374999999872 * 2;
+  } else if (turn_type == TurnType::Dia45_2) {
+    return 0.042953124999997004 * 2;
+  } else if (turn_type == TurnType::Dia135_2) {
+    return 0.061749999999994934 * 2;
+  } else if (turn_type == TurnType::Dia90) {
+    return 0.037046874999997655 * 2;
+  }
   return 0.112813 * 2;
 }
